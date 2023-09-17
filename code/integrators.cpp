@@ -1,4 +1,5 @@
 #include "integrators.h"
+#include <iostream>
 
 
 void IntegratorEuler::step(ParticleSystem &system, double dt) {
@@ -10,7 +11,14 @@ void IntegratorEuler::step(ParticleSystem &system, double dt) {
 
 
 void IntegratorSymplecticEuler::step(ParticleSystem &system, double dt) {
-    // TODO
+    for (Particle* p : system.getParticles()) {
+        Vec3 v0 = p->vel;
+        p->vel = v0 + dt * (p->force/p->mass);
+    }
+    Vecd p0 = system.getPositions();
+    Vecd v1 = system.getVelocities();
+    Vecd p1 = p0 + dt * v1;
+    system.setPositions(p1);
 }
 
 
