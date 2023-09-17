@@ -17,9 +17,10 @@ void IntegratorSymplecticEuler::step(ParticleSystem &system, double dt) {
 void IntegratorMidpoint::step(ParticleSystem &system, double dt) {
     Vecd x0 = system.getState();
     Vecd dx = system.getDerivative();
-    Vecd eulerStep = x0 + dt*dx;
-    Vecd fMid = x0 + eulerStep/2;
-    Vecd x1 = x0 + fMid;
+    Vecd eulerStep = x0 + (dt/2)*dx;
+    system.setState(eulerStep);
+    Vecd dx2 = system.getDerivative();
+    Vecd x1 = x0 + dt*dx2;
     system.setState(x1);
 }
 
