@@ -195,7 +195,7 @@ void SceneProjectiles::update(double dt) {
         Particle* p = systemNumerical1.getParticle(0);
         if (p->pos.y() < 0) {
             // resolve
-            // TODO
+            p->pos.y() = 0;
 
             // stop sim for this system
             system1active = false;
@@ -216,7 +216,7 @@ void SceneProjectiles::update(double dt) {
         Particle* p = systemNumerical2.getParticle(0);
         if (p->pos.y() < 0) {
             // resolve
-            // TODO
+            p->pos.y() = 0;
 
             // stop sim for this system
             system2active = false;
