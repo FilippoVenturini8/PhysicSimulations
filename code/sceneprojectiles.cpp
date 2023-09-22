@@ -197,6 +197,8 @@ void SceneProjectiles::update(double dt) {
             // resolve
             p->pos.y() = 0;
 
+            std::cout << "pos: " << p->pos << std::endl;
+
             // stop sim for this system
             system1active = false;
         }
