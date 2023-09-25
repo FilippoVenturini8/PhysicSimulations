@@ -28,6 +28,11 @@ void SceneFountain::initialize() {
     vaoFloor = glutils::createVAO(shader, &quad);
     glutils::checkGLError();
 
+    // create cube VAO
+    Model cube = Model::createCube();
+    vaoCube = glutils::createVAO(shader, &cube);
+    glutils::checkGLError();
+
     // create sphere VAOs
     Model sphere = Model::createIcosphere(1);
     vaoSphereS = glutils::createVAO(shader, &sphere);
@@ -109,8 +114,29 @@ void SceneFountain::paint(const Camera& camera) {
     shader->setUniformValue("matshin", 0.0f);
     glFuncs->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+    // draw cube
+    vaoCube->bind();
+    modelMat = QMatrix4x4();
+    modelMat.scale(20, 20, 20);
+    shader->setUniformValue("ModelMatrix", modelMat);
+    shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
+    shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
+    shader->setUniformValue("matshin", 0.0f);
+    glFuncs->glDrawElements(GL_TRIANGLES, 1000, GL_UNSIGNED_INT, 0);
+
     // draw the different spheres
     vaoSphereS->bind();
+
+    modelMat = QMatrix4x4();
+    modelMat.translate(0.0, 50.0, 0.0);
+    modelMat.scale(20.0);
+    shader->setUniformValue("ModelMatrix", modelMat);
+    shader->setUniformValue("matdiff", GLfloat(153/255.0), GLfloat(217/255.0), GLfloat(234/255.0));
+    shader->setUniformValue("matspec", 20.0f, 20.0f, 20.0f);
+    shader->setUniformValue("matshin", 100.f);
+
+    glFuncs->glDrawElements(GL_TRIANGLES, 3*numFacesSphereS, GL_UNSIGNED_INT, 0);
+
     for (const Particle* particle : system.getParticles()) {
         Vec3   p = particle->pos;
         Vec3   c = particle->color;

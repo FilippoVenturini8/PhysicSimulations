@@ -184,7 +184,6 @@ void SceneProjectiles::update(double dt) {
         if (trajectoryAnalytic.size() > MAX_TRAJ_POINTS) trajectoryAnalytic.pop_front();
     }
 
-
     // NUMERICAL INTEGRATORS:
 
     if (system1active) {
@@ -196,8 +195,6 @@ void SceneProjectiles::update(double dt) {
         if (p->pos.y() < 0) {
             // resolve
             p->pos.y() = 0;
-
-            std::cout << "pos: " << p->pos << std::endl;
 
             // stop sim for this system
             system1active = false;

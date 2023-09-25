@@ -43,6 +43,7 @@ protected:
     QOpenGLShaderProgram* shader = nullptr;
     QOpenGLVertexArrayObject* vaoSphereS = nullptr;
     QOpenGLVertexArrayObject* vaoFloor   = nullptr;
+    QOpenGLVertexArrayObject* vaoCube = nullptr;
     unsigned int numFacesSphereS = 0;
 
     IntegratorEuler integrator;
