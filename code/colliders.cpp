@@ -13,13 +13,17 @@ bool ColliderPlane::testCollision(const Particle* p) const
 
 void ColliderPlane::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
-    double positionScalar = this->planeN.dot(p->pos) + this->planeD;
-
     Vec3 collisionPos = p->pos;
 
-    p->pos = collisionPos - 2 * positionScalar * this->planeN;
+    p->pos = collisionPos - (1 + kElastic) * (this->planeN.dot(collisionPos) + this->planeD) * this->planeN;
 
     Vec3 collisionVel = p->vel;
 
-    p->vel =  collisionVel - 2 * (this->planeN.dot(collisionVel)) * (this->planeN);
+    p->vel = collisionVel - (1 + kElastic) * (this->planeN.dot(collisionVel)) * this->planeN;
+
+    Vec3 normalVelocity = (this->planeN.dot(p->vel)) * this->planeN;
+
+    Vec3 tangentVelocity = p->vel - normalVelocity;
+
+    p->vel = p->vel - kFriction * tangentVelocity;
 }
