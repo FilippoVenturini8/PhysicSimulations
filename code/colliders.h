@@ -27,10 +27,28 @@ public:
 
     virtual bool testCollision(const Particle* p) const;
     virtual void resolveCollision(Particle* p, double kElastic, double kFriction) const;
+    Vec3 planeN;
 
 protected:
-    Vec3 planeN;
+
     double planeD;
+};
+
+class ColliderSphere : public Collider
+{
+public:
+    ColliderSphere() { center = Vec3(0,0,0); radius = 0; }
+    ColliderSphere(const Vec3& center, double radius) : center(center), radius(radius) {}
+    virtual ~ColliderSphere() {}
+
+    void updateCenter(const Vec3& newCenter) { center = newCenter; }
+
+    virtual bool testCollision(const Particle* p) const;
+    virtual void resolveCollision(Particle* p, double kElastic, double kFriction) const;
+
+protected:
+    Vec3 center;
+    double radius;
 };
 
 

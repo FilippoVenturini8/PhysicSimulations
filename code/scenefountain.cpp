@@ -11,11 +11,14 @@ SceneFountain::SceneFountain() {
 
 
 SceneFountain::~SceneFountain() {
-    if (widget)     delete widget;
-    if (shader)     delete shader;
-    if (vaoFloor)   delete vaoFloor;
-    if (vaoSphereS) delete vaoSphereS;
-    if (fGravity)   delete fGravity;
+    if (widget)         delete widget;
+    if (shader)         delete shader;
+    if (vaoFloor)       delete vaoFloor;
+    if (vaoSphereS)     delete vaoSphereS;
+    if (vaoCube)        delete vaoCube;
+    if (vaoSphereL)     delete vaoSphereL;
+    if (vaoBlackHole)   delete vaoBlackHole;
+    if (fGravity)       delete fGravity;
 }
 
 
@@ -39,14 +42,30 @@ void SceneFountain::initialize() {
     numFacesSphereS = sphere.numFaces();
     glutils::checkGLError();
 
+    // create large sphere VAOs
+    Model sphereL = Model::createIcosphere(3);
+    vaoSphereL = glutils::createVAO(shader, &sphereL);
+    numFacesSphereL = sphereL.numFaces();
+    glutils::checkGLError();
+
+    // create sphere VAOs
+    Model blackHole = Model::createIcosphere(2);
+    vaoBlackHole = glutils::createVAO(shader, &blackHole);
+    numFacesBlackHole = blackHole.numFaces();
+    glutils::checkGLError();
 
     // create forces
     fGravity = new ForceConstAcceleration();
+    fGravitationalAttraction = new ForceGravitationalAttraction();
     system.addForce(fGravity);
+    system.addForce(fGravitationalAttraction);
 
     // scene
-    fountainPos = Vec3(0, 0, 0);
+    fountainPos = Vec3(0, 100, 0);
+    spherePos = Vec3(500, 10, 10);
+    blackHolePos = Vec3(50, 50, 0);
     colliderFloor.setPlane(Vec3(0, 1, 0), 0);
+    colliderSphere = ColliderSphere(spherePos, 10);
 }
 
 
@@ -60,6 +79,7 @@ void SceneFountain::reset()
 
     // erase all particles
     fGravity->clearInfluencedParticles();
+    fGravitationalAttraction->clearInfluencedParticles();
     system.deleteParticles();
     deadParticles.clear();
 }
@@ -115,28 +135,44 @@ void SceneFountain::paint(const Camera& camera) {
     glFuncs->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // draw cube
-    vaoCube->bind();
+    /*vaoCube->bind();
     modelMat = QMatrix4x4();
     modelMat.scale(20, 20, 20);
     shader->setUniformValue("ModelMatrix", modelMat);
     shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
     shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
     shader->setUniformValue("matshin", 0.0f);
-    glFuncs->glDrawElements(GL_TRIANGLES, 1000, GL_UNSIGNED_INT, 0);
+    glFuncs->glDrawElements(GL_TRIANGLES, 1000, GL_UNSIGNED_INT, 0);*/
+
+
+    // draw the big sphere
+
+    vaoSphereL->bind();
+    modelMat = QMatrix4x4();
+    modelMat.translate(spherePos.x(), spherePos.y(), spherePos.z());
+    modelMat.scale(20.0);
+    shader->setUniformValue("ModelMatrix", modelMat);
+    shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
+    shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
+    shader->setUniformValue("matshin", 0.0f);
+
+    glFuncs->glDrawElements(GL_TRIANGLES, 3*numFacesSphereL, GL_UNSIGNED_INT, 0);
+
+    // draw the black hole
+
+    vaoBlackHole->bind();
+    modelMat = QMatrix4x4();
+    modelMat.translate(blackHolePos.x(), blackHolePos.y(), blackHolePos.z());
+    modelMat.scale(5.0);
+    shader->setUniformValue("ModelMatrix", modelMat);
+    shader->setUniformValue("matdiff", 0.0f, 0.0f, 0.0f);
+    shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
+    shader->setUniformValue("matshin", 0.0f);
+
+    glFuncs->glDrawElements(GL_TRIANGLES, 3*numFacesBlackHole, GL_UNSIGNED_INT, 0);
 
     // draw the different spheres
     vaoSphereS->bind();
-
-    modelMat = QMatrix4x4();
-    modelMat.translate(0.0, 50.0, 0.0);
-    modelMat.scale(20.0);
-    shader->setUniformValue("ModelMatrix", modelMat);
-    shader->setUniformValue("matdiff", GLfloat(153/255.0), GLfloat(217/255.0), GLfloat(234/255.0));
-    shader->setUniformValue("matspec", 20.0f, 20.0f, 20.0f);
-    shader->setUniformValue("matshin", 100.f);
-
-    glFuncs->glDrawElements(GL_TRIANGLES, 3*numFacesSphereS, GL_UNSIGNED_INT, 0);
-
     for (const Particle* particle : system.getParticles()) {
         Vec3   p = particle->pos;
         Vec3   c = particle->color;
@@ -175,7 +211,8 @@ void SceneFountain::update(double dt) {
             system.addParticle(p);
 
             // don't forget to add particle to forces that affect it
-            fGravity->addInfluencedParticle(p);
+            //fGravity->addInfluencedParticle(p);
+            fGravitationalAttraction->addInfluencedParticle(p);
         }
 
         p->color = Vec3(153/255.0, 217/255.0, 234/255.0);
@@ -186,7 +223,7 @@ void SceneFountain::update(double dt) {
         double y = 0;
         double z = Random::get(-10.0, 10.0);
         p->pos = Vec3(x, y, z) + fountainPos;
-        p->vel = Vec3((float) rand()/RAND_MAX - 0.5, 40, (float) rand()/RAND_MAX - 0.5);
+        p->vel = Vec3((float) rand()/RAND_MAX - 0.5, 0, (float) rand()/RAND_MAX - 0.5);
     }
 
     // integration step
@@ -199,6 +236,9 @@ void SceneFountain::update(double dt) {
         if (colliderFloor.testCollision(p)) {
             colliderFloor.resolveCollision(p, kBounce, kFriction);
         }
+        /*if(colliderSphere.testCollision(p)){
+            colliderSphere.resolveCollision(p, kBounce, kFriction);
+        }*/
     }
 
     // check dead particles
@@ -234,5 +274,7 @@ void SceneFountain::mouseMoved(const QMouseEvent* e, const Camera& cam)
     }
     else {
         // do something else: e.g. move colliders
+        spherePos += disp;
+        colliderSphere.updateCenter(spherePos);
     }
 }

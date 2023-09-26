@@ -42,21 +42,29 @@ protected:
 
     QOpenGLShaderProgram* shader = nullptr;
     QOpenGLVertexArrayObject* vaoSphereS = nullptr;
+    QOpenGLVertexArrayObject* vaoSphereL = nullptr;
     QOpenGLVertexArrayObject* vaoFloor   = nullptr;
     QOpenGLVertexArrayObject* vaoCube = nullptr;
+    QOpenGLVertexArrayObject* vaoBlackHole = nullptr;
     unsigned int numFacesSphereS = 0;
+    unsigned int numFacesSphereL = 0;
+    unsigned int numFacesBlackHole = 0;
 
     IntegratorEuler integrator;
     ParticleSystem system;
     std::list<Particle*> deadParticles;
     ForceConstAcceleration* fGravity;
+    ForceGravitationalAttraction* fGravitationalAttraction;
     ColliderPlane colliderFloor;
+    ColliderSphere colliderSphere;
 
     double kBounce, kFriction;
     double emitRate;
     double maxParticleLife;
 
     Vec3 fountainPos;
+    Vec3 spherePos;
+    Vec3 blackHolePos;
     int mouseX, mouseY;
 };
 

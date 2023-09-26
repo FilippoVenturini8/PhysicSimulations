@@ -49,5 +49,17 @@ protected:
     Vec3 acceleration;
 };
 
+class ForceGravitationalAttraction : public Force
+{
+public:
+    ForceGravitationalAttraction() {}
+    virtual ~ForceGravitationalAttraction() {}
+
+    virtual void apply();
+
+protected:
+    float G = 6.67 / 1e11;
+};
+
 
 #endif // FORCES_H
