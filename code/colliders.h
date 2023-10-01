@@ -27,10 +27,9 @@ public:
 
     virtual bool testCollision(const Particle* p) const;
     virtual void resolveCollision(Particle* p, double kElastic, double kFriction) const;
-    Vec3 planeN;
 
 protected:
-
+    Vec3 planeN;
     double planeD;
 };
 
@@ -51,6 +50,22 @@ protected:
     double radius;
 };
 
+class ColliderCube : public Collider
+{
+public:
+    ColliderCube() { position = Vec3(0,0,0); side = 0; }
+    ColliderCube(const Vec3& position, double side) : position(position), side(side){}
+    virtual ~ColliderCube() {}
+
+    void updatePosition(const Vec3& newPosition) { position = newPosition; }
+
+    virtual bool testCollision(const Particle* p) const;
+    virtual void resolveCollision(Particle* p, double kElastic, double kFriction) const;
+
+protected:
+    Vec3 position;
+    double side;
+};
 
 
 #endif // COLLIDERS_H

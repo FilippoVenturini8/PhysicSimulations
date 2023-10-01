@@ -102,6 +102,14 @@ void SceneProjectiles::initialize() {
     fGravity2->addInfluencedParticle(systemNumerical2.getParticle(0));
     systemNumerical2.addForce(fGravity2);
 
+    fAirDrag1 = new ForceAirDrag(widget->getAirDragK());
+    fAirDrag1->addInfluencedParticle(systemNumerical1.getParticle(0));
+    systemNumerical1.addForce(fAirDrag1);
+
+    fAirDrag2 = new ForceAirDrag(widget->getAirDragK());
+    fAirDrag2->addInfluencedParticle(systemNumerical2.getParticle(0));
+    systemNumerical2.addForce(fAirDrag2);
+
 }
 
 
@@ -123,6 +131,7 @@ void SceneProjectiles::reset() {
     shotAngle    = Math::toRad(widget->getAngle());
     shotSpeed    = widget->getSpeed();
     gravityAccel = widget->getGravity();
+    airDragK     = widget->getAirDragK();
 
     // integrators
     if (integrator1) delete integrator1;
@@ -142,6 +151,10 @@ void SceneProjectiles::reset() {
     // update gravity accelerations
     fGravity1->setAcceleration(Vec3(0, -gravityAccel, 0));
     fGravity2->setAcceleration(Vec3(0, -gravityAccel, 0));
+
+    // update the air drag
+    fAirDrag1->setK(airDragK);
+    fAirDrag2->setK(airDragK);
 
     // update system forces
     systemNumerical1.updateForces();

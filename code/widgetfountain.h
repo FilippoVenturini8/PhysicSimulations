@@ -15,6 +15,7 @@ public:
     ~WidgetFountain();
 
     double getGravity()    const;
+    bool isBlackHoleActive() const;
 
 signals:
     void updatedParameters();

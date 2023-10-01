@@ -30,6 +30,10 @@ double WidgetProjectiles::getSpeed() const {
     return ui->speed->value();
 }
 
+double WidgetProjectiles::getAirDragK() const{
+    return ui->airDragK->value();
+}
+
 int WidgetProjectiles::getSolver1() const {
     return ui->solver1->currentIndex();
 }

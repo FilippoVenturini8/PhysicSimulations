@@ -54,18 +54,21 @@ void SceneFountain::initialize() {
     numFacesBlackHole = blackHole.numFaces();
     glutils::checkGLError();
 
-    // create forces
-    fGravity = new ForceConstAcceleration();
-    fGravitationalAttraction = new ForceGravitationalAttraction();
-    system.addForce(fGravity);
-    system.addForce(fGravitationalAttraction);
-
     // scene
     fountainPos = Vec3(0, 100, 0);
-    spherePos = Vec3(500, 10, 10);
+    cubePos = Vec3(-50, 30, 10);
+    spherePos = Vec3(0, 0, 0);
     blackHolePos = Vec3(50, 50, 0);
+    cubeSide = 10;
     colliderFloor.setPlane(Vec3(0, 1, 0), 0);
-    colliderSphere = ColliderSphere(spherePos, 10);
+    colliderCube = ColliderCube(cubePos, cubeSide);
+    colliderSphere = ColliderSphere(spherePos, 25);
+
+    // create forces
+    fGravity = new ForceConstAcceleration();
+    fGravitationalAttraction = new ForceGravitationalAttraction(blackHolePos);
+    system.addForce(fGravity);
+    system.addForce(fGravitationalAttraction);    
 }
 
 
@@ -135,14 +138,16 @@ void SceneFountain::paint(const Camera& camera) {
     glFuncs->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // draw cube
-    /*vaoCube->bind();
+
+    vaoCube->bind();
     modelMat = QMatrix4x4();
-    modelMat.scale(20, 20, 20);
+    modelMat.translate(cubePos.x(), cubePos.y(), cubePos.z());
+    modelMat.scale(cubeSide, cubeSide, cubeSide);
     shader->setUniformValue("ModelMatrix", modelMat);
     shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
     shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
     shader->setUniformValue("matshin", 0.0f);
-    glFuncs->glDrawElements(GL_TRIANGLES, 1000, GL_UNSIGNED_INT, 0);*/
+    glFuncs->glDrawElements(GL_TRIANGLES, 100, GL_UNSIGNED_INT, 0);
 
 
     // draw the big sphere
@@ -150,7 +155,7 @@ void SceneFountain::paint(const Camera& camera) {
     vaoSphereL->bind();
     modelMat = QMatrix4x4();
     modelMat.translate(spherePos.x(), spherePos.y(), spherePos.z());
-    modelMat.scale(20.0);
+    modelMat.scale(25.0);
     shader->setUniformValue("ModelMatrix", modelMat);
     shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
     shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
@@ -211,8 +216,14 @@ void SceneFountain::update(double dt) {
             system.addParticle(p);
 
             // don't forget to add particle to forces that affect it
-            //fGravity->addInfluencedParticle(p);
+            fGravity->addInfluencedParticle(p);
             fGravitationalAttraction->addInfluencedParticle(p);
+        }
+
+        if(widget->isBlackHoleActive()){
+            fGravitationalAttraction->enableBlackHole();
+        }else{
+            fGravitationalAttraction->disableBlackHole();
         }
 
         p->color = Vec3(153/255.0, 217/255.0, 234/255.0);
@@ -236,9 +247,12 @@ void SceneFountain::update(double dt) {
         if (colliderFloor.testCollision(p)) {
             colliderFloor.resolveCollision(p, kBounce, kFriction);
         }
-        /*if(colliderSphere.testCollision(p)){
-            colliderSphere.resolveCollision(p, kBounce, kFriction);
+        /*if(colliderCube.testCollision(p)){
+            std::cout << "collision" << std::endl;
         }*/
+        if(colliderSphere.testCollision(p)){
+            colliderSphere.resolveCollision(p, kBounce, kFriction);
+        }
     }
 
     // check dead particles

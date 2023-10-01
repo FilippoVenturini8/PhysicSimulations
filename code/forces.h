@@ -49,16 +49,38 @@ protected:
     Vec3 acceleration;
 };
 
+class ForceAirDrag : public Force
+{
+public:
+    ForceAirDrag() { k = 0; }
+    ForceAirDrag(double k) { this->k = k; }
+    virtual ~ForceAirDrag() {}
+
+    virtual void apply();
+
+    void setK(double newK) { k = newK; }
+    double getK() const { return k; }
+
+protected:
+    double k;
+};
+
 class ForceGravitationalAttraction : public Force
 {
 public:
     ForceGravitationalAttraction() {}
+    ForceGravitationalAttraction(Vec3 blackHolePostition) {this->blackHolePos = blackHolePostition;}
     virtual ~ForceGravitationalAttraction() {}
 
     virtual void apply();
 
+    void enableBlackHole() { blackHoleMass = 2.e15; }
+    void disableBlackHole() { blackHoleMass = 0.0; }
+
 protected:
     float G = 6.67 / 1e11;
+    Vec3 blackHolePos;
+    double blackHoleMass;
 };
 
 

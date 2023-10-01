@@ -49,6 +49,7 @@ protected:
     unsigned int numFacesSphereS = 0;
     unsigned int numFacesSphereL = 0;
     unsigned int numFacesBlackHole = 0;
+    unsigned int cubeSide = 0;
 
     IntegratorEuler integrator;
     ParticleSystem system;
@@ -56,6 +57,7 @@ protected:
     ForceConstAcceleration* fGravity;
     ForceGravitationalAttraction* fGravitationalAttraction;
     ColliderPlane colliderFloor;
+    ColliderCube colliderCube;
     ColliderSphere colliderSphere;
 
     double kBounce, kFriction;
@@ -63,6 +65,7 @@ protected:
     double maxParticleLife;
 
     Vec3 fountainPos;
+    Vec3 cubePos;
     Vec3 spherePos;
     Vec3 blackHolePos;
     int mouseX, mouseY;

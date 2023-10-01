@@ -53,6 +53,8 @@ protected:
     ParticleSystem systemNumerical2;
     ForceConstAcceleration *fGravity1 = nullptr;
     ForceConstAcceleration *fGravity2 = nullptr;
+    ForceAirDrag *fAirDrag1 = nullptr;
+    ForceAirDrag *fAirDrag2 = nullptr;
     bool system1active, system2active;
 
     std::list<Vec3> trajectoryAnalytic;
@@ -61,6 +63,7 @@ protected:
 
     double time = 0;
     double gravityAccel;
+    double airDragK;
     double shotHeight, shotAngle, shotSpeed;
 };
 #endif // SCENEPROJECTILES_H
