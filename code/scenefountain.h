@@ -50,6 +50,7 @@ protected:
     unsigned int numFacesSphereL = 0;
     unsigned int numFacesBlackHole = 0;
     unsigned int cubeSide = 0;
+    unsigned int sphereSize = 0;
 
     IntegratorEuler integrator;
     ParticleSystem system;

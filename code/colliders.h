@@ -59,6 +59,7 @@ public:
 
     void updatePosition(const Vec3& newPosition) { position = newPosition; }
 
+    virtual bool isRayIntersecting(const Particle* p, Vec3 &intersectionPoint) const;
     virtual bool testCollision(const Particle* p) const;
     virtual void resolveCollision(Particle* p, double kElastic, double kFriction) const;
 

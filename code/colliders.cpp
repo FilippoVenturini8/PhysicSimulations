@@ -57,20 +57,73 @@ void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFric
  * Cube
  */
 
+bool ColliderCube::isRayIntersecting(const Particle* p, Vec3 &intersectionPoint)const
+{
+    Vec3 dir = p->vel;
+    Vec3 pos = p->pos;
+    float tmin = 0.0f;
+    float tmax = std::numeric_limits<float>::max();
+    double EPSILON = 0.000000001;
+
+    for (int i = 0; i < 3; i++) {
+        float a = this->position[i] - (this->side / 2);
+        float b = this->position[i] + (this->side / 2);
+        if (abs(dir[i]) < EPSILON) {
+            if (pos[i] < a || pos[i] > b) return false;
+        } else {
+            dir =  p->vel.normalized();
+
+            float t1 = (a - pos[i])/dir[i];
+            float t2 = (b - pos[i])/dir[i];
+
+            if (t1 > t2) std::swap(t1, t2);
+            if (t1 > tmin) tmin = t1;
+            if (t2 < tmax) tmax = t2;
+            if (tmin > tmax) return false;
+        }
+    }
+
+    intersectionPoint = pos + dir * tmin;
+    if(p->radius <= tmin){
+        return false;
+    }else{
+        return true;
+    }
+}
+
 
 bool ColliderCube::testCollision(const Particle* p)const
 {
-    double x_max = this->position.x() + this->side/2;
-    double x_min = this->position.x() - this->side/2;
-    double y_max = this->position.y() + this->side/2;
-    double y_min = this->position.y() - this->side/2;
-    double z_max = this->position.z() + this->side/2;
-    double z_min = this->position.z() - this->side/2;
-    return (p->pos.x() <= x_max && p->pos.x() >= x_min) && (p->pos.y() <= y_max && p->pos.y() >= y_min) && (p->pos.z() <= z_max && p->pos.z() >= z_min);
+    Vec3 intersectionPoint = Vec3(0.0f,0.0f,0.0f);
+
+    bool intersection = this->isRayIntersecting(p, intersectionPoint);
+
+    return intersection;
 }
 
 void ColliderCube::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
-    // TODO
+    Vec3 intersectionPoint = Vec3(0.0f,0.0f,0.0f);
+    this->isRayIntersecting(p, intersectionPoint);
+
+    for(int i = 0; i < 3; i++){
+        float a = position[i] - (this->side / 2);
+        float b = position[i] + (this->side / 2);
+        ColliderPlane* collisionSide = new ColliderPlane();
+        Vec3 planeN = Vec3(0,0,0);
+        planeN[i] = 1;
+
+        if(abs(intersectionPoint[i]-a) < 0.0001){
+            p->pos[i] = a;
+            collisionSide->setPlane(planeN, a);
+            collisionSide->resolveCollision(p, kElastic, kFriction);
+            return;
+        }else if (abs(intersectionPoint[i]-b) < 0.0001){
+            p->pos[i] = b;
+            collisionSide->setPlane(-planeN, b);
+            collisionSide->resolveCollision(p, kElastic, kFriction);
+            return;
+        }
+    }
 }
 

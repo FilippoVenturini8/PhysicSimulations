@@ -55,14 +55,17 @@ void SceneFountain::initialize() {
     glutils::checkGLError();
 
     // scene
+    cubeSide = 30;
+    sphereSize = 20;
+
     fountainPos = Vec3(0, 100, 0);
-    cubePos = Vec3(-50, 30, 10);
-    spherePos = Vec3(0, 0, 0);
-    blackHolePos = Vec3(50, 50, 0);
-    cubeSide = 10;
+    cubePos = Vec3(-15, 15, 0);
+    spherePos = Vec3(50, 30, 0);
+    blackHolePos = Vec3(50, 50, -50);
+
     colliderFloor.setPlane(Vec3(0, 1, 0), 0);
     colliderCube = ColliderCube(cubePos, cubeSide);
-    colliderSphere = ColliderSphere(spherePos, 25);
+    colliderSphere = ColliderSphere(spherePos, sphereSize);
 
     // create forces
     fGravity = new ForceConstAcceleration();
@@ -142,7 +145,7 @@ void SceneFountain::paint(const Camera& camera) {
     vaoCube->bind();
     modelMat = QMatrix4x4();
     modelMat.translate(cubePos.x(), cubePos.y(), cubePos.z());
-    modelMat.scale(cubeSide, cubeSide, cubeSide);
+    modelMat.scale(cubeSide/2.0, cubeSide/2.0, cubeSide/2.0);
     shader->setUniformValue("ModelMatrix", modelMat);
     shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
     shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
@@ -155,7 +158,7 @@ void SceneFountain::paint(const Camera& camera) {
     vaoSphereL->bind();
     modelMat = QMatrix4x4();
     modelMat.translate(spherePos.x(), spherePos.y(), spherePos.z());
-    modelMat.scale(25.0);
+    modelMat.scale(sphereSize);
     shader->setUniformValue("ModelMatrix", modelMat);
     shader->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
     shader->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
@@ -247,9 +250,9 @@ void SceneFountain::update(double dt) {
         if (colliderFloor.testCollision(p)) {
             colliderFloor.resolveCollision(p, kBounce, kFriction);
         }
-        /*if(colliderCube.testCollision(p)){
-            std::cout << "collision" << std::endl;
-        }*/
+        if(colliderCube.testCollision(p)){
+            colliderCube.resolveCollision(p, kBounce, kFriction);
+        }
         if(colliderSphere.testCollision(p)){
             colliderSphere.resolveCollision(p, kBounce, kFriction);
         }
