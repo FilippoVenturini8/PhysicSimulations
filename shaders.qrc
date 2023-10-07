@@ -7,5 +7,8 @@
         <file>shaders/lines.vert</file>
         <file>shaders/lines.geom</file>
         <file>shaders/lines.frag</file>
+        <file>shaders/cloth.frag</file> 
+        <file>shaders/cloth.geom</file> 
+        <file>shaders/cloth.vert</file>
     </qresource>
 </RCC>

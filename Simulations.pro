@@ -19,8 +19,10 @@ SOURCES += \
     code/mainwindow.cpp \
     code/model.cpp \
     code/particlesystem.cpp \
+    code/scenecloth.cpp \
     code/scenefountain.cpp \
     code/sceneprojectiles.cpp \
+    code/widgetcloth.cpp \
     code/widgetfountain.cpp \
     code/widgetprojectiles.cpp \
 
@@ -37,13 +39,16 @@ HEADERS += \
     code/particle.h \
     code/particlesystem.h \
     code/scene.h \
+    code/scenecloth.h \
     code/scenefountain.h \
     code/sceneprojectiles.h \
+    code/widgetcloth.h \
     code/widgetfountain.h \
     code/widgetprojectiles.h \
 
 FORMS += \
     forms/mainwindow.ui \
+    forms/widgetcloth.ui \
     forms/widgetfountain.ui \
     forms/widgetprojectiles.ui \
 

@@ -5,7 +5,7 @@
 #include <Eigen/Geometry>
 typedef Eigen::Vector2d Vec2;
 typedef Eigen::Vector3d Vec3;
-typedef Eigen::Vector3i Vec2i;
+typedef Eigen::Vector2i Vec2i;
 typedef Eigen::Vector3i Vec3i;
 typedef Eigen::VectorXd Vecd;
 typedef Eigen::MatrixXd Matd;
