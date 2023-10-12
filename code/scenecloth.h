@@ -8,11 +8,7 @@
 #include "widgetcloth.h"
 #include "particlesystem.h"
 #include "integrators.h"
-
-
-// TODO: remove this declaration and properly declare+implement your own spring in forces.h
-class ForceSpring : public Force {};
-
+#include "colliders.h"
 
 class SceneCloth : public Scene
 {
@@ -63,7 +59,7 @@ protected:
     bool showParticles = true;
 
     // physics
-    IntegratorEuler integrator; // TODO: pick a better one
+    IntegratorSymplecticEuler integrator; // TODO: pick a better one
     ParticleSystem system;
     ForceConstAcceleration* fGravity = nullptr;
     std::vector<ForceSpring*> springsStretch;
@@ -83,8 +79,8 @@ protected:
     double particleRadius = 1;
 
     // TODO: this is just a hint from my solution
-    //ColliderSolidSphere colliderBall;
-    //ColliderSolidAABB   colliderCube;
+    ColliderSphere colliderBall;
+    ColliderAABB colliderCube;
     //ColliderHollowAABB  colliderWalls;
 
     // mouse interaction

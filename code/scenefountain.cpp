@@ -64,7 +64,7 @@ void SceneFountain::initialize() {
     blackHolePos = Vec3(50, 50, -50);
 
     colliderFloor.setPlane(Vec3(0, 1, 0), 0);
-    colliderCube = ColliderCube(cubePos, cubeSide);
+    colliderCube = ColliderAABB(cubePos, Vec3(cubeSide, cubeSide, cubeSide));
     colliderSphere = ColliderSphere(spherePos, sphereSize);
 
     // create forces

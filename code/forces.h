@@ -83,5 +83,21 @@ protected:
     double blackHoleMass;
 };
 
+class ForceSpring : public Force
+{
+public:
+    ForceSpring() { ks = 0; kd = 0; }
+    ForceSpring(double ks, double kd) {this->ks = ks; this->kd = kd;}
+
+    virtual void apply();
+
+    void updateKs(double newKs) { this->ks = newKs; }
+    void updateKd(double newKd) { this->kd = newKd; }
+
+protected:
+    double ks;
+    double kd;
+};
+
 
 #endif // FORCES_H

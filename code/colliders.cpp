@@ -57,7 +57,7 @@ void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFric
  * Cube
  */
 
-bool ColliderCube::isRayIntersecting(const Particle* p, Vec3 &intersectionPoint)const
+bool ColliderAABB::isRayIntersecting(const Particle* p, Vec3 &intersectionPoint)const
 {
     Vec3 dir = p->vel;
     Vec3 pos = p->pos;
@@ -66,8 +66,8 @@ bool ColliderCube::isRayIntersecting(const Particle* p, Vec3 &intersectionPoint)
     double EPSILON = 0.000000001;
 
     for (int i = 0; i < 3; i++) {
-        float a = this->position[i] - (this->side / 2);
-        float b = this->position[i] + (this->side / 2);
+        float a = this->position[i] - (this->dimension[i] / 2);
+        float b = this->position[i] + (this->dimension[i] / 2);
         if (abs(dir[i]) < EPSILON) {
             if (pos[i] < a || pos[i] > b) return false;
         } else {
@@ -92,7 +92,7 @@ bool ColliderCube::isRayIntersecting(const Particle* p, Vec3 &intersectionPoint)
 }
 
 
-bool ColliderCube::testCollision(const Particle* p)const
+bool ColliderAABB::testCollision(const Particle* p)const
 {
     Vec3 intersectionPoint = Vec3(0.0f,0.0f,0.0f);
 
@@ -101,17 +101,21 @@ bool ColliderCube::testCollision(const Particle* p)const
     return intersection;
 }
 
-void ColliderCube::resolveCollision(Particle* p, double kElastic, double kFriction) const
+void ColliderAABB::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
     Vec3 intersectionPoint = Vec3(0.0f,0.0f,0.0f);
     this->isRayIntersecting(p, intersectionPoint);
 
     for(int i = 0; i < 3; i++){
-        float a = position[i] - (this->side / 2);
-        float b = position[i] + (this->side / 2);
+        float a = position[i] - (this->dimension[i] / 2);
+        float b = position[i] + (this->dimension[i] / 2);
         ColliderPlane* collisionSide = new ColliderPlane();
         Vec3 planeN = Vec3(0,0,0);
         planeN[i] = 1;
+
+        if(i == 2 || i == 0){
+            std::swap(a, b);
+        }
 
         if(abs(intersectionPoint[i]-a) < 0.0001){
             p->pos[i] = a;

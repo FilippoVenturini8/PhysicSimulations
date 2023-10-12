@@ -74,8 +74,8 @@ void SceneCloth::initialize() {
     system.addForce(fGravity);
 
     // TODO: again, from my solution setup, these were the colliders
-    //colliderBall.setCenter(Vec3(40,-20,0));
-    //colliderBall.setRadius(30);
+    colliderBall.updateCenter(Vec3(40,-20,0));
+    colliderBall.setRadius(30);
     //colliderCube.setFromCenterSize(Vec3(-60,30,0), Vec3(60, 40, 60));
     //colliderWalls.setFromCenterSize(Vec3(0, 0, 0), Vec3(200, 200, 200));
 }
@@ -137,12 +137,110 @@ void SceneCloth::reset()
             fGravity->addInfluencedParticle(p);
         }
     }
+    fixedParticle[0] = true;
+    fixedParticle[numParticlesY-1] = true;
 
     // forces: gravity
     system.addForce(fGravity);
 
     // TODO: create spring forces
     // Code for PROVOT layout
+
+    //Stretch springs
+    for (int i = 0; i < numParticlesX; i++) {
+        for (int j = 0; j < numParticlesY; j++) {
+            Particle* pij = system.getParticle(i*numParticlesY + j);
+
+            if(i != numParticlesX - 1 && j != numParticlesY - 1){
+                Particle* pij_i_plus = system.getParticle((i+1)*numParticlesY + j);
+                Particle* pij_j_plus = system.getParticle(i*numParticlesY + (j+1));
+
+                ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+                ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+
+                s1->addInfluencedParticle(pij);
+                s1->addInfluencedParticle(pij_i_plus);
+
+                s2->addInfluencedParticle(pij);
+                s2->addInfluencedParticle(pij_j_plus);
+
+                springsStretch.push_back(s1);
+                springsStretch.push_back(s2);
+                system.addForce(s1);
+                system.addForce(s2);
+            }else if (i == numParticlesX - 1 && j != numParticlesY - 1){
+                Particle* pij_j_plus = system.getParticle(i*numParticlesY + (j+1));
+
+                ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+                s2->addInfluencedParticle(pij);
+                s2->addInfluencedParticle(pij_j_plus);
+
+                springsStretch.push_back(s2);
+                system.addForce(s2);
+            }else if(j == numParticlesY - 1 && j != numParticlesY - 1){
+                Particle* pij_i_plus = system.getParticle((i+1)*numParticlesY + j);
+
+                ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+                s2->addInfluencedParticle(pij);
+                s2->addInfluencedParticle(pij_i_plus);
+
+                springsStretch.push_back(s2);
+                system.addForce(s2);
+            }
+        }
+    }
+
+    //Shear springs
+    for (int i = 0; i < numParticlesX; i++) {
+        for (int j = 0; j < numParticlesY; j++) {
+            if(i != numParticlesX - 1 && j != numParticlesY - 1 && i != 0 && j != 0){
+                Particle* p_top_right = system.getParticle((i+1)*numParticlesY + (j+1));
+                Particle* p_bottom_right = system.getParticle((i-1)*numParticlesY + (j+1));
+                Particle* p_bottom_left = system.getParticle((i-1)*numParticlesY + (j-1));
+                Particle* p_top_left = system.getParticle((i+1)*numParticlesY + (j-1));
+
+
+                ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+                s1->addInfluencedParticle(p_top_right);
+                s1->addInfluencedParticle(p_bottom_left);
+
+                ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+                s2->addInfluencedParticle(p_bottom_right);
+                s2->addInfluencedParticle(p_top_left);
+
+                springsShear.push_back(s1);
+                springsShear.push_back(s2);
+
+                system.addForce(s1);
+                system.addForce(s2);
+            }
+        }
+    }
+
+    //Bend springs
+    for (int i = 2; i < numParticlesX - 2; i++) {
+        for (int j = 2; j < numParticlesY - 2; j++) {
+            Particle* p_top = system.getParticle((i+2)*numParticlesY+j);
+            Particle* p_bottom = system.getParticle((i-2)*numParticlesY+j);
+            Particle* p_left = system.getParticle((i)*numParticlesY + (j-2));
+            Particle* p_right = system.getParticle((i)*numParticlesY + (j+2));
+
+            ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+            s1->addInfluencedParticle(p_top);
+            s1->addInfluencedParticle(p_bottom);
+
+            ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
+            s2->addInfluencedParticle(p_left);
+            s2->addInfluencedParticle(p_right);
+
+            springsBend.push_back(s1);
+            springsBend.push_back(s2);
+
+            system.addForce(s1);
+            system.addForce(s2);
+        }
+    }
+
     updateSprings();
 
     // update index buffer
@@ -254,6 +352,17 @@ void SceneCloth::paint(const Camera& camera)
     }
 
     // TODO: draw colliders and walls
+
+    vaoSphereL->bind();
+    modelMat = QMatrix4x4();
+    modelMat.translate(colliderBall.getCenter().x(), colliderBall.getCenter().y(), colliderBall.getCenter().z());
+    modelMat.scale(colliderBall.getRadius());
+    shaderPhong->setUniformValue("ModelMatrix", modelMat);
+    shaderPhong->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
+    shaderPhong->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
+    shaderPhong->setUniformValue("matshin", 0.0f);
+
+    glFuncs->glDrawElements(GL_TRIANGLES, 3*numFacesSphereL, GL_UNSIGNED_INT, 0);
 
     shaderPhong->release();
 

@@ -58,7 +58,7 @@ protected:
     ForceConstAcceleration* fGravity;
     ForceGravitationalAttraction* fGravitationalAttraction;
     ColliderPlane colliderFloor;
-    ColliderCube colliderCube;
+    ColliderAABB colliderCube;
     ColliderSphere colliderSphere;
 
     double kBounce, kFriction;

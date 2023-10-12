@@ -21,3 +21,15 @@ void ForceGravitationalAttraction::apply(){
         p->force += ((G * blackHoleMass * p->mass) / pow(fmax(distance, 0.01), 3)) * (blackHolePos - p->pos);
     }
 }
+
+void ForceSpring::apply(){
+    Particle* p0 = particles[0];
+    Particle* p1 = particles[1];
+
+    Vec3 posDiff = p1->pos - p0->pos;
+
+    Vec3 springForce = (ks * (posDiff.norm() - 1.0) + kd * (p1->vel - p0->vel).dot((posDiff/posDiff.norm()))) * (posDiff/posDiff.norm());
+
+    p0->force += springForce;
+    p1->force += -springForce;
+}

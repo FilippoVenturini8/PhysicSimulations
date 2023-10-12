@@ -41,6 +41,9 @@ public:
     virtual ~ColliderSphere() {}
 
     void updateCenter(const Vec3& newCenter) { center = newCenter; }
+    void setRadius(const double newRadius){ radius = newRadius; }
+    Vec3 getCenter(){ return center; }
+    double getRadius(){ return radius; }
 
     virtual bool testCollision(const Particle* p) const;
     virtual void resolveCollision(Particle* p, double kElastic, double kFriction) const;
@@ -50,12 +53,12 @@ protected:
     double radius;
 };
 
-class ColliderCube : public Collider
+class ColliderAABB : public Collider
 {
 public:
-    ColliderCube() { position = Vec3(0,0,0); side = 0; }
-    ColliderCube(const Vec3& position, double side) : position(position), side(side){}
-    virtual ~ColliderCube() {}
+    ColliderAABB() { position = Vec3(0,0,0); dimension = Vec3(0,0,0); }
+    ColliderAABB(const Vec3& position, Vec3 dimension) : position(position), dimension(dimension){}
+    virtual ~ColliderAABB() {}
 
     void updatePosition(const Vec3& newPosition) { position = newPosition; }
 
@@ -65,7 +68,7 @@ public:
 
 protected:
     Vec3 position;
-    double side;
+    Vec3 dimension;
 };
 
 
