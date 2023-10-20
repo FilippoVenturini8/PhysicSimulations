@@ -35,10 +35,10 @@ void IntegratorMidpoint::step(ParticleSystem &system, double dt) {
 
 void IntegratorVerlet::step(ParticleSystem &system, double dt) {
     for(Particle* p : system.getParticles()){
-        if(p->pos.x() == 0){
+        if(p->pos.x() == p->prevPos.x() && p->pos.y() == p->prevPos.y() && p->pos.z() == p->prevPos.z()){
             p->prevPos = p->pos - p->vel * dt;
         }
-        Vec3 p1 = p->pos + 1 * (p->pos - p->prevPos) + ((dt*dt)/p->mass) * p->force;
+        Vec3 p1 = p->pos + kd * (p->pos - p->prevPos) + ((dt*dt)/p->mass) * p->force;
         p->prevPos = p->pos;
         p->pos = p1;
     }

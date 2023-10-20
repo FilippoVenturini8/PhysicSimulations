@@ -59,7 +59,7 @@ protected:
     bool showParticles = true;
 
     // physics
-    IntegratorSymplecticEuler integrator; // TODO: pick a better one
+    IntegratorVerlet integrator; // TODO: pick a better one
     ParticleSystem system;
     ForceConstAcceleration* fGravity = nullptr;
     std::vector<ForceSpring*> springsStretch;
