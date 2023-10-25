@@ -40,6 +40,7 @@ public slots:
     void updateSprings();
     void updateSimParams();
     void freeAnchors();
+    void relaxationStep(std::vector<ForceSpring*> f);
 
 protected:
     // ui
@@ -52,6 +53,7 @@ protected:
     QOpenGLVertexArrayObject* vaoSphereL = nullptr;
     QOpenGLVertexArrayObject* vaoCube    = nullptr;
     QOpenGLVertexArrayObject* vaoMesh    = nullptr;
+    QOpenGLVertexArrayObject* vaoFloor   = nullptr;
     QOpenGLBuffer* vboMesh = nullptr;
     QOpenGLBuffer* iboMesh = nullptr;
     unsigned int numFacesSphereS = 0, numFacesSphereL = 0;
@@ -79,6 +81,7 @@ protected:
     double particleRadius = 1;
 
     // TODO: this is just a hint from my solution
+    ColliderPlane colliderFloor;
     ColliderSphere colliderBall;
     ColliderAABB colliderCube;
     //ColliderHollowAABB  colliderWalls;

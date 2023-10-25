@@ -28,7 +28,7 @@ void ForceSpring::apply(){
 
     Vec3 posDiff = p1->pos - p0->pos;
 
-    Vec3 springForce = (ks * (posDiff.norm() - 1.0) + kd * (p1->vel - p0->vel).dot((posDiff/posDiff.norm()))) * (posDiff/posDiff.norm());
+    Vec3 springForce = (ks * (posDiff.norm() - this->l) + kd * (p1->vel - p0->vel).dot((posDiff/posDiff.norm()))) * (posDiff/posDiff.norm());
 
     p0->force += springForce;
     p1->force += -springForce;

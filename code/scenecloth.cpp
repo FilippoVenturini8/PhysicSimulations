@@ -34,6 +34,11 @@ void SceneCloth::initialize() {
     shaderPhong = glutils::loadShaderProgram(":/shaders/phong.vert", ":/shaders/phong.frag");
     shaderCloth = glutils::loadShaderProgram(":/shaders/cloth.vert", ":/shaders/cloth.geom", ":/shaders/cloth.frag");
 
+    // create floor VAO
+    Model quad = Model::createQuad();
+    vaoFloor = glutils::createVAO(shaderPhong, &quad);
+    glutils::checkGLError();
+
     // create sphere VAOs
     Model sphere = Model::createIcosphere(3);
     vaoSphereL = glutils::createVAO(shaderPhong, &sphere);
@@ -74,8 +79,9 @@ void SceneCloth::initialize() {
     system.addForce(fGravity);
 
     // TODO: again, from my solution setup, these were the colliders
-    colliderBall.updateCenter(Vec3(40,-10,0));
+    colliderBall.updateCenter(Vec3(80,-10,0));
     colliderBall.setRadius(30);
+    colliderFloor.setPlane(Vec3(0, 1, 0), 0);
     //colliderCube.setFromCenterSize(Vec3(-60,30,0), Vec3(60, 40, 60));
     //colliderWalls.setFromCenterSize(Vec3(0, 0, 0), Vec3(200, 200, 200));
 
@@ -124,7 +130,7 @@ void SceneCloth::reset()
             fixedParticle[idx] = false;
             double tx = i*edgeX - 0.5*clothWidth;
             double ty = j*edgeY - 0.5*clothHeight;
-            Vec3 pos = Vec3(ty+edgeY, 70 - tx - edgeX, 0);
+            Vec3 pos = Vec3(ty+edgeY, 80, 70 - tx - edgeX);
 
             Particle* p = new Particle();
             p->id = idx;
@@ -134,13 +140,16 @@ void SceneCloth::reset()
             p->mass = 1;
             p->radius = particleRadius;
             p->color = Vec3(235/255.0, 51/255.0, 36/255.0);
+            p->isFixed = false;
 
             system.addParticle(p);
             fGravity->addInfluencedParticle(p);
         }
     }
     fixedParticle[0] = true;
+    system.getParticles()[0]->isFixed = true;
     fixedParticle[numParticlesY-1] = true;
+    system.getParticles()[numParticlesY-1]->isFixed = true;
 
     // forces: gravity
     system.addForce(fGravity);
@@ -398,6 +407,14 @@ void SceneCloth::paint(const Camera& camera)
     }
 
     // TODO: draw colliders and walls
+    vaoFloor->bind();
+    modelMat = QMatrix4x4();
+    modelMat.scale(100, 1, 100);
+    shaderPhong->setUniformValue("ModelMatrix", modelMat);
+    shaderPhong->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
+    shaderPhong->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
+    shaderPhong->setUniformValue("matshin", 0.0f);
+    glFuncs->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     vaoSphereL->bind();
     modelMat = QMatrix4x4();
@@ -478,9 +495,16 @@ void SceneCloth::update(double dt)
 
     // TODO: relaxation
 
+    this->relaxationStep(springsStretch);
+    this->relaxationStep(springsShear);
+    this->relaxationStep(springsBend);
+
     // collisions
     for (Particle* p : system.getParticles()) {
         // TODO: test and resolve collisions
+        if(colliderFloor.testCollision(p)){
+            colliderFloor.resolveCollision(p, 0.5, 0.1);
+        }
         if(colliderBall.testCollision(p)){
             colliderBall.resolveCollision(p, 0.5, 0.1);
         }
@@ -488,6 +512,27 @@ void SceneCloth::update(double dt)
 
     // needed after we have done collisions and relaxation, since spring forces depend on p and v
     system.updateForces();
+}
+
+void SceneCloth::relaxationStep(std::vector<ForceSpring*> forces){
+    for (ForceSpring* f : forces) {
+        Particle* p0 = f->getInfluencedParticles()[0];
+        Particle* p1 = f->getInfluencedParticles()[1];
+        double distance = sqrt(pow(p0->pos.x() - p1->pos.x(), 2) + pow(p0->pos.y() - p1->pos.y(), 2) + pow(p0->pos.z() - p1->pos.z(), 2));
+        Vec3 direction = (p1->pos - p0->pos).normalized();
+        double delta = (distance - f->getL()) / 2;
+
+        if(distance > f->getL()){
+            if(!p0->isFixed && !p1->isFixed){
+                p0->pos += direction * delta;
+                p1->pos -= direction * delta;
+            }else if(p0->isFixed && !p1->isFixed){
+                p1->pos -= direction * (delta*2);
+            }else if(!p0->isFixed && p1->isFixed){
+                p0->pos += direction * (delta*2);
+            }
+        }
+    }
 }
 
 

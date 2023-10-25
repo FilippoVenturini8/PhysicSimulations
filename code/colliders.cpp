@@ -44,10 +44,9 @@ bool ColliderSphere::testCollision(const Particle* p)const
 void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
     Vec3 planeN = -(p->pos - this->center)/pow((p->pos - this->center).dot(p->pos - this->center), 0.5);
-    double planD = -(planeN.dot(p->pos));
-    ColliderPlane tangentPlane = ColliderPlane(planeN, planD);
+    double planeD = -(planeN.dot(p->pos));
+    ColliderPlane tangentPlane = ColliderPlane(planeN, planeD);
     tangentPlane.resolveCollision(p, kElastic, kFriction);
-
     if(this->testCollision(p)){
         p->pos += 0.2 * p->vel;
     }

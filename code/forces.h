@@ -93,8 +93,10 @@ public:
 
     void updateKs(double newKs) { this->ks = newKs; }
     void updateKd(double newKd) { this->kd = newKd; }
+    double getL(){ return this->l; }
 
 protected:
+    double l = 1.5;
     double ks;
     double kd;
 };
