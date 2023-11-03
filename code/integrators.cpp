@@ -42,4 +42,17 @@ void IntegratorVerlet::step(ParticleSystem &system, double dt) {
         p->prevPos = p->pos;
         p->pos = p1;
     }
+    /*Vecd p0 = system.getPositions();
+
+    if(p0 == system.getPreviousPositions()){
+        system.setPreviousPositions(p0 - system.getVelocities() * dt);
+    }
+    Vecd atemp = system.getAccelerations();
+    Vecd p1 = p0 + kd * (system.getPositions() - system.getPreviousPositions()) + atemp * pow(dt,2);
+
+    Vecd v1 = (p1 - p0)/dt;
+
+    system.setPreviousPositions(p0);
+    system.setPositions(p1);
+    system.setVelocities(v1);*/
 }

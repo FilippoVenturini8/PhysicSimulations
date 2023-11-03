@@ -79,6 +79,8 @@ protected:
     double colBounce = 0.01;
     double colFriction = 0.05;
     double particleRadius = 1;
+    unsigned int cubeSide = 0;
+    Vec3 cubePos;
 
     // TODO: this is just a hint from my solution
     ColliderPlane colliderFloor;

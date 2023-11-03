@@ -15,6 +15,7 @@ bool ColliderPlane::testCollision(const Particle* p) const
 void ColliderPlane::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
     Vec3 collisionPos = p->pos;
+    p->prevPos = p->pos;
 
     p->pos = collisionPos - (1 + kElastic) * (this->planeN.dot(collisionPos) + this->planeD) * this->planeN;
 
@@ -46,10 +47,14 @@ void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFric
     Vec3 planeN = -(p->pos - this->center)/pow((p->pos - this->center).dot(p->pos - this->center), 0.5);
     double planeD = -(planeN.dot(p->pos));
     ColliderPlane tangentPlane = ColliderPlane(planeN, planeD);
+    /*std::cout << "prev pos: "<< p->pos << std::endl;
+    std::cout << "planeD: "<< planeD << std::endl;*/
     tangentPlane.resolveCollision(p, kElastic, kFriction);
     if(this->testCollision(p)){
+        p->prevPos = p->pos;
         p->pos += 0.2 * p->vel;
     }
+    //std::cout << "after pos: "<< p->pos << std::endl;
 }
 
 /*
@@ -104,6 +109,7 @@ void ColliderAABB::resolveCollision(Particle* p, double kElastic, double kFricti
 {
     Vec3 intersectionPoint = Vec3(0.0f,0.0f,0.0f);
     this->isRayIntersecting(p, intersectionPoint);
+    p->prevPos = p->pos;
 
     for(int i = 0; i < 3; i++){
         float a = position[i] - (this->dimension[i] / 2);

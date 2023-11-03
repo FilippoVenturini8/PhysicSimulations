@@ -3,6 +3,7 @@
 #include "model.h"
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLBuffer>
+#include <cmath>
 
 
 SceneCloth::SceneCloth() {
@@ -78,10 +79,14 @@ void SceneCloth::initialize() {
     fGravity = new ForceConstAcceleration();
     system.addForce(fGravity);
 
+    cubeSide = 30;
+    cubePos = Vec3(-45, 15, 0);
+
     // TODO: again, from my solution setup, these were the colliders
-    colliderBall.updateCenter(Vec3(80,-10,0));
+    colliderBall.updateCenter(Vec3(0,10,0));
     colliderBall.setRadius(30);
     colliderFloor.setPlane(Vec3(0, 1, 0), 0);
+    colliderCube = ColliderAABB(cubePos, Vec3(cubeSide, cubeSide, cubeSide));
     //colliderCube.setFromCenterSize(Vec3(-60,30,0), Vec3(60, 40, 60));
     //colliderWalls.setFromCenterSize(Vec3(0, 0, 0), Vec3(200, 200, 200));
 
@@ -130,7 +135,7 @@ void SceneCloth::reset()
             fixedParticle[idx] = false;
             double tx = i*edgeX - 0.5*clothWidth;
             double ty = j*edgeY - 0.5*clothHeight;
-            Vec3 pos = Vec3(ty+edgeY, 80, 70 - tx - edgeX);
+            Vec3 pos = Vec3(ty+edgeY, 80, 70 - tx - edgeX - 70);
 
             Particle* p = new Particle();
             p->id = idx;
@@ -147,9 +152,9 @@ void SceneCloth::reset()
         }
     }
     fixedParticle[0] = true;
-    system.getParticles()[0]->isFixed = true;
+    system.getParticle(0)->isFixed = true;
     fixedParticle[numParticlesY-1] = true;
-    system.getParticles()[numParticlesY-1]->isFixed = true;
+    system.getParticle(numParticlesY-1)->isFixed = true;
 
     // forces: gravity
     system.addForce(fGravity);
@@ -171,9 +176,11 @@ void SceneCloth::reset()
 
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(pij_i_plus);
+                s1->setL(1.5);
 
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
+                s2->setL(1.5);
 
                 springsStretch.push_back(s1);
                 springsStretch.push_back(s2);
@@ -185,6 +192,7 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
+                s2->setL(1.5);
 
                 springsStretch.push_back(s2);
                 system.addForce(s2);
@@ -194,6 +202,7 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_i_plus);
+                s2->setL(1.5);
 
                 springsStretch.push_back(s2);
                 system.addForce(s2);
@@ -213,10 +222,12 @@ void SceneCloth::reset()
                 ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(p_top_left);
+                s1->setL(2.12);
 
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(p_top_right);
+                s2->setL(2.12);
 
                 springsShear.push_back(s1);
                 springsShear.push_back(s2);
@@ -229,6 +240,7 @@ void SceneCloth::reset()
                 ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(p_top_left);
+                s1->setL(2.12);
 
                 springsShear.push_back(s1);
                 system.addForce(s1);
@@ -238,6 +250,7 @@ void SceneCloth::reset()
                 ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(p_top_right);
+                s1->setL(2.12);
 
                 springsShear.push_back(s1);
                 system.addForce(s1);
@@ -260,9 +273,11 @@ void SceneCloth::reset()
 
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(pij_i_plus);
+                s1->setL(3.0);
 
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
+                s2->setL(3.0);
 
                 springsStretch.push_back(s1);
                 springsStretch.push_back(s2);
@@ -274,6 +289,7 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
+                s2->setL(3.0);
 
                 springsStretch.push_back(s2);
                 system.addForce(s2);
@@ -283,6 +299,7 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_i_plus);
+                s2->setL(3.0);
 
                 springsStretch.push_back(s2);
                 system.addForce(s2);
@@ -334,8 +351,8 @@ void SceneCloth::updateSprings()
         f->updateKd(kd);
     }
     for (ForceSpring* f : springsBend) {
-        f->updateKs(0);
-        f->updateKd(0);
+        f->updateKs(ks);
+        f->updateKd(kd);
     }
 }
 
@@ -427,8 +444,17 @@ void SceneCloth::paint(const Camera& camera)
 
     glFuncs->glDrawElements(GL_TRIANGLES, 3*numFacesSphereL, GL_UNSIGNED_INT, 0);
 
-    shaderPhong->release();
+    vaoCube->bind();
+    modelMat = QMatrix4x4();
+    modelMat.translate(cubePos.x(), cubePos.y(), cubePos.z());
+    modelMat.scale(cubeSide/2.0, cubeSide/2.0, cubeSide/2.0);
+    shaderPhong->setUniformValue("ModelMatrix", modelMat);
+    shaderPhong->setUniformValue("matdiff", 0.8f, 0.8f, 0.8f);
+    shaderPhong->setUniformValue("matspec", 0.0f, 0.0f, 0.0f);
+    shaderPhong->setUniformValue("matshin", 0.0f);
+    glFuncs->glDrawElements(GL_TRIANGLES, 100, GL_UNSIGNED_INT, 0);
 
+    shaderPhong->release();
 
     // update cloth mesh VBO coords
     vboMesh->bind();
@@ -467,7 +493,6 @@ void SceneCloth::paint(const Camera& camera)
     glutils::checkGLError();
 }
 
-
 void SceneCloth::update(double dt)
 {
     // fixed particles: no velocity, no force acting
@@ -488,6 +513,7 @@ void SceneCloth::update(double dt)
     if (selectedParticle >= 0) {
         Particle* p = system.getParticle(selectedParticle);
         // p->pos = ?; TODO: assign cursor world position (see code, it's already computed)
+        p->pos = cursorWorldPos;
         p->vel = Vec3(0,0,0);
 
         // TODO: test and resolve for collisions during user movement
@@ -508,6 +534,9 @@ void SceneCloth::update(double dt)
         if(colliderBall.testCollision(p)){
             colliderBall.resolveCollision(p, 0.5, 0.1);
         }
+        if(colliderCube.testCollision(p)){
+            colliderCube.resolveCollision(p, 0.5, 0.1);
+        }
     }
 
     // needed after we have done collisions and relaxation, since spring forces depend on p and v
@@ -519,18 +548,28 @@ void SceneCloth::relaxationStep(std::vector<ForceSpring*> forces){
         Particle* p0 = f->getInfluencedParticles()[0];
         Particle* p1 = f->getInfluencedParticles()[1];
         double distance = sqrt(pow(p0->pos.x() - p1->pos.x(), 2) + pow(p0->pos.y() - p1->pos.y(), 2) + pow(p0->pos.z() - p1->pos.z(), 2));
-        Vec3 direction = (p1->pos - p0->pos).normalized();
-        double delta = (distance - f->getL()) / 2;
 
-        if(distance > f->getL()){
+        //std::cout << "distance: " << distance << std::endl;
+        if(!_isnan(distance) && distance > f->getL()){
+            Vec3 direction = (p1->pos - p0->pos).normalized();
+            double delta = (distance - f->getL()) / 2.0f;
+
+            /*std::cout << "p0: " << p0->pos << std::endl;
+            std::cout << "p1: " << p1->pos << std::endl;*/
+            //std::cout << "distance: " << distance << std::endl;
             if(!p0->isFixed && !p1->isFixed){
+                p0->prevPos = p0->pos;
+                p1->prevPos = p1->pos;
                 p0->pos += direction * delta;
                 p1->pos -= direction * delta;
             }else if(p0->isFixed && !p1->isFixed){
-                p1->pos -= direction * (delta*2);
+                p1->prevPos = p1->pos;
+                p1->pos -= direction * (delta*2.0f);
             }else if(!p0->isFixed && p1->isFixed){
-                p0->pos += direction * (delta*2);
+                p0->prevPos = p0->pos;
+                p0->pos += direction * (delta*2.0f);
             }
+
         }
     }
 }
@@ -546,9 +585,19 @@ void SceneCloth::mousePressed(const QMouseEvent* e, const Camera& cam)
         Vec3 rayDir = cam.getRayDir(grabX, grabY);
         Vec3 origin = cam.getPos();
 
+
         selectedParticle = -1;
         for (int i = 0; i < numParticles; i++) {
             // TODO: point-ray dist to check if we select one particle
+            Vec3 camPartDirection = (system.getParticle(i)->pos - origin).normalized();
+
+            if(abs(camPartDirection.x() - rayDir.normalized().x()) < 0.01 &&
+                abs(camPartDirection.y() - rayDir.normalized().y()) < 0.01 &&
+                abs(camPartDirection.z() - rayDir.normalized().z()) < 0.01){
+
+                selectedParticle = i;
+                break;
+            }
         }
 
         if (selectedParticle >= 0) {
