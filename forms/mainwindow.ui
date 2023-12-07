@@ -147,6 +147,7 @@
     <addaction name="actionSceneProjectiles"/>
     <addaction name="actionSceneFountain"/>
     <addaction name="actionSceneCloth"/>
+    <addaction name="actionSceneFluid"/>
    </widget>
    <widget class="QMenu" name="menuCamera">
     <property name="title">
@@ -194,6 +195,11 @@
   <action name="actionSceneCloth">
    <property name="text">
     <string>Cloth</string>
+   </property>
+  </action>
+  <action name="actionSceneFluid">
+   <property name="text">
+    <string>Fluid</string>
    </property>
   </action>
  </widget>

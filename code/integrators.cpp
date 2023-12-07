@@ -21,6 +21,18 @@ void IntegratorSymplecticEuler::step(ParticleSystem &system, double dt) {
     system.setPositions(p1);
 }
 
+void IntegratorSymplecticEuler::stepWithoutPS(std::vector<Particle*> particles, double dt){
+    for (Particle* p : particles) {
+        Vec3 v0 = p->vel;
+        p->vel = v0 + dt * (p->force/p->mass);
+
+        Vecd p0 = p->pos;
+        Vecd v1 = p->vel;
+
+        p->pos = p0 + dt * v1;
+    }
+}
+
 
 void IntegratorMidpoint::step(ParticleSystem &system, double dt) {
     Vecd x0 = system.getState();

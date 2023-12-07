@@ -47,14 +47,12 @@ void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFric
     Vec3 planeN = -(p->pos - this->center)/pow((p->pos - this->center).dot(p->pos - this->center), 0.5);
     double planeD = -(planeN.dot(p->pos));
     ColliderPlane tangentPlane = ColliderPlane(planeN, planeD);
-    /*std::cout << "prev pos: "<< p->pos << std::endl;
-    std::cout << "planeD: "<< planeD << std::endl;*/
     tangentPlane.resolveCollision(p, kElastic, kFriction);
     if(this->testCollision(p)){
         p->prevPos = p->pos;
         p->pos += 0.2 * p->vel;
     }
-    //std::cout << "after pos: "<< p->pos << std::endl;
+
 }
 
 /*

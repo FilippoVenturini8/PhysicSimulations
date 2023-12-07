@@ -18,11 +18,14 @@ SOURCES += \
     code/main.cpp \
     code/mainwindow.cpp \
     code/model.cpp \
+    code/particlehashgrid.cpp \
     code/particlesystem.cpp \
     code/scenecloth.cpp \
+    code/scenefluid.cpp \
     code/scenefountain.cpp \
     code/sceneprojectiles.cpp \
     code/widgetcloth.cpp \
+    code/widgetfluid.cpp \
     code/widgetfountain.cpp \
     code/widgetprojectiles.cpp \
 
@@ -37,18 +40,22 @@ HEADERS += \
     code/mainwindow.h \
     code/model.h \
     code/particle.h \
+    code/particlehashgrid.h \
     code/particlesystem.h \
     code/scene.h \
     code/scenecloth.h \
+    code/scenefluid.h \
     code/scenefountain.h \
     code/sceneprojectiles.h \
     code/widgetcloth.h \
+    code/widgetfluid.h \
     code/widgetfountain.h \
     code/widgetprojectiles.h \
 
 FORMS += \
     forms/mainwindow.ui \
     forms/widgetcloth.ui \
+    forms/widgetfluid.ui \
     forms/widgetfountain.ui \
     forms/widgetprojectiles.ui \
 

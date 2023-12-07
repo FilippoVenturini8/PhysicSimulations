@@ -3,6 +3,7 @@
 #include "sceneprojectiles.h"
 #include "scenefountain.h"
 #include "scenecloth.h"
+#include <SceneFluid.h>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -26,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionSceneProjectiles,&QAction::triggered, this, [=](void){ changeScene(new SceneProjectiles()); });
     connect(ui->actionSceneFountain,   &QAction::triggered, this, [=](void){ changeScene(new SceneFountain()); });
     connect(ui->actionSceneCloth, &QAction::triggered, this, [=](void){ changeScene(new SceneCloth()); });
+    connect(ui->actionSceneFluid, &QAction::triggered, this, [=](void){ changeScene(new SceneFluid()); });
+
 }
 
 MainWindow::~MainWindow()

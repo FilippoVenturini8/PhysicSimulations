@@ -20,6 +20,7 @@ public:
 class IntegratorSymplecticEuler : public Integrator {
 public:
     virtual void step(ParticleSystem& system, double dt);
+    virtual void stepWithoutPS(std::vector<Particle*> particles, double dt);
 };
 
 

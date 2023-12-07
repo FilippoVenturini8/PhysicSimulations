@@ -76,8 +76,8 @@ protected:
 
     // collision properties
     bool checkCollisions = true;
-    double colBounce = 0.01;
-    double colFriction = 0.05;
+    double colBounce = 0.2;
+    double colFriction = 0.1;
     double particleRadius = 1;
     unsigned int cubeSide = 0;
     Vec3 cubePos;

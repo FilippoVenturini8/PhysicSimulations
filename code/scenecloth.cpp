@@ -163,6 +163,7 @@ void SceneCloth::reset()
     // Code for PROVOT layout
 
     //Stretch springs
+
     for (int i = 0; i < numParticlesX; i++) {
         for (int j = 0; j < numParticlesY; j++) {
             Particle* pij = system.getParticle(i*numParticlesY + j);
@@ -517,6 +518,18 @@ void SceneCloth::update(double dt)
         p->vel = Vec3(0,0,0);
 
         // TODO: test and resolve for collisions during user movement
+        for (Particle* p : system.getParticles()) {
+            // TODO: test and resolve collisions
+            if(colliderFloor.testCollision(p)){
+                colliderFloor.resolveCollision(p, colBounce, colFriction);
+            }
+            if(colliderBall.testCollision(p)){
+                colliderBall.resolveCollision(p, colBounce, colFriction);
+            }
+            if(colliderCube.testCollision(p)){
+                colliderCube.resolveCollision(p, colBounce, colFriction);
+            }
+        }
     }
 
     // TODO: relaxation
@@ -529,13 +542,13 @@ void SceneCloth::update(double dt)
     for (Particle* p : system.getParticles()) {
         // TODO: test and resolve collisions
         if(colliderFloor.testCollision(p)){
-            colliderFloor.resolveCollision(p, 0.5, 0.1);
+            colliderFloor.resolveCollision(p, colBounce, colFriction);
         }
         if(colliderBall.testCollision(p)){
-            colliderBall.resolveCollision(p, 0.5, 0.1);
+            colliderBall.resolveCollision(p, colBounce, colFriction);
         }
         if(colliderCube.testCollision(p)){
-            colliderCube.resolveCollision(p, 0.5, 0.1);
+            colliderCube.resolveCollision(p, colBounce, colFriction);
         }
     }
 
@@ -554,9 +567,6 @@ void SceneCloth::relaxationStep(std::vector<ForceSpring*> forces){
             Vec3 direction = (p1->pos - p0->pos).normalized();
             double delta = (distance - f->getL()) / 2.0f;
 
-            /*std::cout << "p0: " << p0->pos << std::endl;
-            std::cout << "p1: " << p1->pos << std::endl;*/
-            //std::cout << "distance: " << distance << std::endl;
             if(!p0->isFixed && !p1->isFixed){
                 p0->prevPos = p0->pos;
                 p1->prevPos = p1->pos;
@@ -584,7 +594,6 @@ void SceneCloth::mousePressed(const QMouseEvent* e, const Camera& cam)
 
         Vec3 rayDir = cam.getRayDir(grabX, grabY);
         Vec3 origin = cam.getPos();
-
 
         selectedParticle = -1;
         for (int i = 0; i < numParticles; i++) {
