@@ -4,8 +4,6 @@
 
 int ParticleHashGrid::hashCoords(double xi, double yi, double zi)
 {
-    /*int hashCoord = (intCoord(xi) * 20 + intCoord(yi)) * 20 + intCoord(zi);
-    return hashCoord;*/
     int h = (int(xi) * 92837111)^(int(yi) * 689287499)^(int(zi) * 283923481);
     return abs(h) % this->tableSize;
 }
@@ -56,24 +54,12 @@ void ParticleHashGrid:: query(Vec3 pos, double maxDist)
     int x0 = this->intCoord(pos.x() - maxDist);
     int y0 = this->intCoord(pos.y() - maxDist);
     int z0 = this->intCoord(pos.z() - maxDist);
-    //std::cout << "pos:" <<pos[i]->pos << std::endl;
+
     int x1 = this->intCoord(pos.x() + maxDist);
     int y1 = this->intCoord(pos.y() + maxDist);
     int z1 = this->intCoord(pos.z() + maxDist);
 
     this->querySize = 0;
-
-    /*std::cout << "x0" << x0 << std::endl;
-    std::cout << "y0" << y0 << std::endl;
-    std::cout << "z0" << z0 << std::endl;
-
-    std::cout << "x1" << x1 << std::endl;
-    std::cout << "y1" << y1 << std::endl;
-    std::cout << "z1" << z1 << std::endl;*/
-
-    /*for(int t = 0; t < this->cellStart.size(); t++){
-        std::cout << "Cell Start: " << this->cellStart[t] << std::endl;
-    }*/
 
     for(int xi = x0; xi <= x1; xi++)
     {
@@ -81,24 +67,13 @@ void ParticleHashGrid:: query(Vec3 pos, double maxDist)
         {
             for(int zi = z0; zi <= z1; zi++)
             {
-               /*std::cout << "xi" << xi << std::endl;
-               std::cout << "yi" << yi << std::endl;
-               std::cout << "zi" << zi << std::endl;*/
-
                int hash = this->hashCoords(xi, yi, zi);
-
-               //std::cout << "hash" << hash << std::endl;
 
                int start = this->cellStart[hash];
                int end = this->cellStart[hash + 1];
 
-               //std::cout << "start: " << this->cellStart[hash] << std::endl;
-               //std::cout << "end: " << this->cellStart[hash + 1] << std::endl;
-
                for(int j = start; j < end; j++) //It enters here only if the partial sums of 2 cells are different
                {
-                   //std::cout << "enter" << std::endl;
-
                    //If the neighbor is not already found due to hash collisions
                    if(std::find(queryIds.begin(), queryIds.end(), this->cellEntries[j]) == queryIds.end()){
                        this->queryIds[this->querySize] = this->cellEntries[j];

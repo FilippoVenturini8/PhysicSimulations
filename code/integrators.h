@@ -36,5 +36,10 @@ public:
     double kd = 1;
 };
 
+class IntegratorRK2 : public Integrator {
+public:
+    virtual void step(ParticleSystem& system, double dt);
+};
+
 
 #endif // INTEGRATORS_H

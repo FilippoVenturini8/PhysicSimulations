@@ -1,7 +1,7 @@
 #include "colliders.h"
 #include <cmath>
 #include <iostream>
-
+#include <limits>  // For FLT_MAX
 
 /*
  * Plane
@@ -44,8 +44,17 @@ bool ColliderSphere::testCollision(const Particle* p)const
 
 void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
-    Vec3 planeN = -(p->pos - this->center)/pow((p->pos - this->center).dot(p->pos - this->center), 0.5);
-    double planeD = -(planeN.dot(p->pos));
+    Vec3 planeN = (this->center - p->pos) / (p->pos - this->center).norm();
+
+    Vec3 sphereToParticle = p->pos - this->center;
+
+    // Normalize the direction vector
+    Vec3 normalizedDirection = sphereToParticle.normalized();
+
+    // Compute the collision point on the sphere's surface
+    Vec3 collisionPoint = this->center + this->radius * normalizedDirection;
+
+    double planeD = -(planeN.dot(collisionPoint));
     ColliderPlane tangentPlane = ColliderPlane(planeN, planeD);
     tangentPlane.resolveCollision(p, kElastic, kFriction);
     if(this->testCollision(p)){
@@ -61,20 +70,22 @@ void ColliderSphere::resolveCollision(Particle* p, double kElastic, double kFric
 
 bool ColliderAABB::isRayIntersecting(const Particle* p, Vec3 &intersectionPoint)const
 {
-    Vec3 dir = p->vel;
+    Vec3 dir = (p->pos - p->prevPos).normalized();
     Vec3 pos = p->pos;
     float tmin = 0.0f;
     float tmax = std::numeric_limits<float>::max();
     double EPSILON = 0.000000001;
 
+    if(dir.norm() == 0){
+        return false;
+    }
+
     for (int i = 0; i < 3; i++) {
-        float a = this->position[i] - (this->dimension[i] / 2);
-        float b = this->position[i] + (this->dimension[i] / 2);
+        double a = this->position[i] - (this->dimension[i] / 2);
+        double b = this->position[i] + (this->dimension[i] / 2);
         if (abs(dir[i]) < EPSILON) {
             if (pos[i] < a || pos[i] > b) return false;
         } else {
-            dir =  p->vel.normalized();
-
             float t1 = (a - pos[i])/dir[i];
             float t2 = (b - pos[i])/dir[i];
 
@@ -105,32 +116,34 @@ bool ColliderAABB::testCollision(const Particle* p)const
 
 void ColliderAABB::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
-    Vec3 intersectionPoint = Vec3(0.0f,0.0f,0.0f);
+    Vec3 intersectionPoint = Vec3(0.0f, 0.0f, 0.0f);
     this->isRayIntersecting(p, intersectionPoint);
     p->prevPos = p->pos;
 
     for(int i = 0; i < 3; i++){
-        float a = position[i] - (this->dimension[i] / 2);
-        float b = position[i] + (this->dimension[i] / 2);
-        ColliderPlane* collisionSide = new ColliderPlane();
+        double a = position[i] - (this->dimension[i] / 2);
+        double b = position[i] + (this->dimension[i] / 2);
+        ColliderPlane collisionSide = ColliderPlane();
         Vec3 planeN = Vec3(0,0,0);
         planeN[i] = 1;
+        planeN.normalize();
 
         if(i == 2 || i == 0){
             std::swap(a, b);
         }
 
         if(abs(intersectionPoint[i]-a) < 0.0001){
-            p->pos[i] = a;
-            collisionSide->setPlane(planeN, a);
-            collisionSide->resolveCollision(p, kElastic, kFriction);
+            collisionSide.setPlane(planeN, a);
+            collisionSide.resolveCollision(p, kElastic, kFriction);
             return;
         }else if (abs(intersectionPoint[i]-b) < 0.0001){
-            p->pos[i] = b;
-            collisionSide->setPlane(-planeN, b);
-            collisionSide->resolveCollision(p, kElastic, kFriction);
+            collisionSide.setPlane(-planeN, b);
+            collisionSide.resolveCollision(p, kElastic, kFriction);
             return;
         }
     }
 }
+
+
+
 

@@ -39,9 +39,9 @@ void SceneFluid::initialize() {
     vaoSphereS = glutils::createVAO(shaderPhong, &sphere);
     numFacesSphereS = sphere.numFaces();
 
-    numParticlesX = 3;
-    numParticlesY = 3;
-    numParticlesZ = 3;
+    numParticlesX = 10;
+    numParticlesY = 10;
+    numParticlesZ = 10;
     numParticles = numParticlesX * numParticlesY * numParticlesZ;
 
     this->integrator = new IntegratorSymplecticEuler();
@@ -80,7 +80,7 @@ void SceneFluid::reset()
                 p->pos = pos;
                 p->prevPos = pos;
                 p->vel = Vec3(0,0,0);
-                p->mass = 0.01;
+                p->mass = 1.0;
                 p->radius = particleRadius;
                 p->color = Vec3(235/255.0, 51/255.0, 36/255.0);
                 p->isFixed = false;
@@ -92,6 +92,8 @@ void SceneFluid::reset()
             }
         }
     }
+
+    std:: cout << "nParticles"<< this->particles.size() << std::endl;
 
     this->forces.push_back(this->fGravity);
     this->forces.push_back(this->fNavierStockes);

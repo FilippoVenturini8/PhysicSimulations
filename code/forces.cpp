@@ -50,12 +50,10 @@ double smoothingKernelSpiky(double r, double h){ // r = distance from current pa
 
 Vec3* gradientSmoothingKernelSpiky(Vec3* r, double h){
     Vec3* gradient = new Vec3();
-    Vec3 r_normalized = r->normalized();
-    double r_norm = r->norm();
 
-    gradient->x()= - 45 / (3.141f * pow(h,6)) * r->x()/r_normalized.x() * pow(h - r_norm, 2);
-    gradient->y()= - 45 / (3.141f * pow(h,6)) * r->y()/r_normalized.y() * pow(h - r_norm, 2);
-    gradient->z()= - 45 / (3.141f * pow(h,6)) * r->z()/r_normalized.z() * pow(h - r_norm, 2);
+    gradient->x()= - 45 / (3.141f * pow(h,6)) * r->x() * pow(h - r->x(), 2);
+    gradient->y()= - 45 / (3.141f * pow(h,6)) * r->y() * pow(h - r->y(), 2);
+    gradient->z()= - 45 / (3.141f * pow(h,6)) * r->z() * pow(h - r->z(), 2);
     return gradient;
 }
 
@@ -83,7 +81,8 @@ double ForceNavierStockes::densityCalculation(Particle *p){
 }
 
 double ForceNavierStockes::pressureCalculation(double density){
-    return 35000 * (pow(density/this->waterDensity, 7) - 1);
+    //return 35000 * (pow(density/this->waterDensity, 7) - 1);
+    return ((density/0.2) - 1);
 }
 
 void ForceNavierStockes::pressureAccelerationCalculation(){
@@ -91,8 +90,10 @@ void ForceNavierStockes::pressureAccelerationCalculation(){
         Vec3* pressure = new Vec3();
 
         double densityPi = densityCalculation(pi);
+        //std::cout << "densityPi: " <<densityPi << std::endl;
         double pressurePi = this->pressureCalculation(densityPi)/(densityPi * densityPi);
-        std::cout << "pressurePi: " <<pressurePi << std::endl;
+        //std::cout << "pressurePi: " <<pressurePi << std::endl;
+        //std::cout <<"neighbors: " << pi->neighbors->size() << std::endl;
 
         for (Particle* pj : *pi->neighbors){
 
@@ -114,9 +115,9 @@ void ForceNavierStockes::pressureAccelerationCalculation(){
             pressure->z() += gradient->z() * pressureTerm;
         }
 
-        std::cout << "PressureX: " << pressure->x() * pi->mass << std::endl;
-        std::cout << "PressureY: " << pressure->y() * pi->mass << std::endl;
-        std::cout << "PressureZ: " << pressure->z() * pi->mass << std::endl;
+        //std::cout << "PressureX: " << pressure->x() * pi->mass << std::endl;
+        //std::cout << "PressureY: " << pressure->y() * pi->mass << std::endl;
+        //std::cout << "PressureZ: " << pressure->z() * pi->mass << std::endl;
 
         pi->force.x() += pressure->x() * pi->mass;
         pi->force.y() += pressure->y() * pi->mass;
@@ -145,6 +146,10 @@ void ForceNavierStockes::viscosityAccelerationCalculation(){
             viscosity->z() += laplacian->z() * vij.z();
         }
 
+        std::cout << "ViscosityX: " << viscosity->x() * pi->mass << std::endl;
+        std::cout << "ViscosityY: " << viscosity->y() * pi->mass << std::endl;
+        std::cout << "ViscosityZ: " << viscosity->z() * pi->mass << std::endl;
+
         pi->force.x() += viscosity->x() * pi->mass;
         pi->force.y() += viscosity->y() * pi->mass;
         pi->force.z() += viscosity->z() * pi->mass;
@@ -152,8 +157,8 @@ void ForceNavierStockes::viscosityAccelerationCalculation(){
 }
 
 void ForceNavierStockes::apply(){
-    //this->pressureAccelerationCalculation();
-    this->viscosityAccelerationCalculation();
+    this->pressureAccelerationCalculation();
+    //this->viscosityAccelerationCalculation();
 }
 
 

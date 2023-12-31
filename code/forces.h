@@ -116,7 +116,7 @@ protected:
     void viscosityAccelerationCalculation();
 
     double viscosity = 0.05;
-    double waterDensity = 1000.0;
+    double waterDensity = 1.0;
     double soundSpeed = 10.0; // For dt = 0.0001 s,  1 to 10 for dt = 0.01 to 0.03
 };
 

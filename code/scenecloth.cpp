@@ -177,11 +177,11 @@ void SceneCloth::reset()
 
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(pij_i_plus);
-                s1->setL(1.5);
+                s1->setL((pij_i_plus->pos - pij->pos).norm());
 
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
-                s2->setL(1.5);
+                s2->setL((pij_j_plus->pos - pij->pos).norm());
 
                 springsStretch.push_back(s1);
                 springsStretch.push_back(s2);
@@ -193,7 +193,7 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
-                s2->setL(1.5);
+                s2->setL((pij_j_plus->pos - pij->pos).norm());
 
                 springsStretch.push_back(s2);
                 system.addForce(s2);
@@ -203,7 +203,7 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_i_plus);
-                s2->setL(1.5);
+                s2->setL((pij_i_plus->pos - pij->pos).norm());
 
                 springsStretch.push_back(s2);
                 system.addForce(s2);
@@ -223,12 +223,12 @@ void SceneCloth::reset()
                 ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(p_top_left);
-                s1->setL(2.12);
+                s1->setL((p_top_left->pos - pij->pos).norm());
 
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(p_top_right);
-                s2->setL(2.12);
+                s2->setL((p_top_right->pos - pij->pos).norm());
 
                 springsShear.push_back(s1);
                 springsShear.push_back(s2);
@@ -241,7 +241,7 @@ void SceneCloth::reset()
                 ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(p_top_left);
-                s1->setL(2.12);
+                s1->setL((p_top_left->pos - pij->pos).norm());
 
                 springsShear.push_back(s1);
                 system.addForce(s1);
@@ -251,7 +251,7 @@ void SceneCloth::reset()
                 ForceSpring* s1 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(p_top_right);
-                s1->setL(2.12);
+                s1->setL((p_top_right->pos - pij->pos).norm());
 
                 springsShear.push_back(s1);
                 system.addForce(s1);
@@ -274,14 +274,14 @@ void SceneCloth::reset()
 
                 s1->addInfluencedParticle(pij);
                 s1->addInfluencedParticle(pij_i_plus);
-                s1->setL(3.0);
+                s1->setL((pij_i_plus->pos - pij->pos).norm());
 
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
-                s2->setL(3.0);
+                s2->setL((pij_j_plus->pos - pij->pos).norm());
 
-                springsStretch.push_back(s1);
-                springsStretch.push_back(s2);
+                springsBend.push_back(s1);
+                springsBend.push_back(s2);
                 system.addForce(s1);
                 system.addForce(s2);
             }else if (i > numParticlesX - 3 && j <= numParticlesY - 3){
@@ -290,9 +290,9 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_j_plus);
-                s2->setL(3.0);
+                s2->setL((pij_j_plus->pos - pij->pos).norm());
 
-                springsStretch.push_back(s2);
+                springsBend.push_back(s2);
                 system.addForce(s2);
             }else if(j > numParticlesY - 3 && i <= numParticlesX - 3){
                 Particle* pij_i_plus = system.getParticle((i+2)*numParticlesY + j);
@@ -300,9 +300,9 @@ void SceneCloth::reset()
                 ForceSpring* s2 = new ForceSpring(widget->getStiffness(), widget->getDamping());
                 s2->addInfluencedParticle(pij);
                 s2->addInfluencedParticle(pij_i_plus);
-                s2->setL(3.0);
+                s2->setL((pij_i_plus->pos - pij->pos).norm());
 
-                springsStretch.push_back(s2);
+                springsBend.push_back(s2);
                 system.addForce(s2);
             }
         }
@@ -532,6 +532,19 @@ void SceneCloth::update(double dt)
         }
     }
 
+    for (Particle* p : system.getParticles()) {
+        // TODO: test and resolve collisions
+        if(colliderFloor.testCollision(p)){
+            colliderFloor.resolveCollision(p, colBounce, colFriction);
+        }
+        if(colliderBall.testCollision(p)){
+            colliderBall.resolveCollision(p, colBounce, colFriction);
+        }
+        if(colliderCube.testCollision(p)){
+            colliderCube.resolveCollision(p, colBounce, colFriction);
+        }
+    }
+
     // TODO: relaxation
 
     this->relaxationStep(springsStretch);
@@ -560,7 +573,7 @@ void SceneCloth::relaxationStep(std::vector<ForceSpring*> forces){
     for (ForceSpring* f : forces) {
         Particle* p0 = f->getInfluencedParticles()[0];
         Particle* p1 = f->getInfluencedParticles()[1];
-        double distance = sqrt(pow(p0->pos.x() - p1->pos.x(), 2) + pow(p0->pos.y() - p1->pos.y(), 2) + pow(p0->pos.z() - p1->pos.z(), 2));
+        double distance = (p0->pos - p1->pos).norm();
 
         //std::cout << "distance: " << distance << std::endl;
         if(!_isnan(distance) && distance > f->getL()){
@@ -568,15 +581,11 @@ void SceneCloth::relaxationStep(std::vector<ForceSpring*> forces){
             double delta = (distance - f->getL()) / 2.0f;
 
             if(!p0->isFixed && !p1->isFixed){
-                p0->prevPos = p0->pos;
-                p1->prevPos = p1->pos;
                 p0->pos += direction * delta;
                 p1->pos -= direction * delta;
             }else if(p0->isFixed && !p1->isFixed){
-                p1->prevPos = p1->pos;
                 p1->pos -= direction * (delta*2.0f);
             }else if(!p0->isFixed && p1->isFixed){
-                p0->prevPos = p0->pos;
                 p0->pos += direction * (delta*2.0f);
             }
 

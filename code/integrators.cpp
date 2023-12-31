@@ -54,17 +54,22 @@ void IntegratorVerlet::step(ParticleSystem &system, double dt) {
         p->prevPos = p->pos;
         p->pos = p1;
     }
-    /*Vecd p0 = system.getPositions();
+}
 
-    if(p0 == system.getPreviousPositions()){
-        system.setPreviousPositions(p0 - system.getVelocities() * dt);
-    }
-    Vecd atemp = system.getAccelerations();
-    Vecd p1 = p0 + kd * (system.getPositions() - system.getPreviousPositions()) + atemp * pow(dt,2);
+void IntegratorRK2::step(ParticleSystem &system, double dt) {
+    Vecd x0 = system.getState();
+    Vecd k1 = system.getDerivative();
 
-    Vecd v1 = (p1 - p0)/dt;
+    // Calculate x1_temp without updating forces
+    Vecd x1_temp = x0 + 0.5 * dt * k1;
 
-    system.setPreviousPositions(p0);
-    system.setPositions(p1);
-    system.setVelocities(v1);*/
+    // Calculate k2 based on x1_temp, without updating forces
+    system.setState(x1_temp, false);
+    Vecd k2 = system.getDerivative();
+
+    // Update the state using RK2 formula
+    Vecd x1 = x0 + dt * k2;
+
+    // Set the final state
+    system.setState(x1);
 }
