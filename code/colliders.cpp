@@ -9,25 +9,25 @@
 
 bool ColliderPlane::testCollision(const Particle* p) const
 {
-    return this->planeN.dot(p->pos) + this->planeD * this->planeN.dot(p->prevPos) + this->planeD <= 0;
+    if((planeN.dot(p->pos) + planeD) * (planeN.dot(p->prevPos) + planeD) <= 0){
+        return true;
+    }
+    return false;
 }
 
 void ColliderPlane::resolveCollision(Particle* p, double kElastic, double kFriction) const
 {
-    Vec3 collisionPos = p->pos;
-    p->prevPos = p->pos;
+    double scalar1 = planeN.dot(p->pos) + planeD;
+    Vec3 newpos = p->pos - (1 + kElastic) * scalar1 * planeN;
+    Vec3 newvel = p->vel - (1 + kElastic) * (planeN.dot(p->vel)) * planeN;
 
-    p->pos = collisionPos - (1 + kElastic) * (this->planeN.dot(collisionPos) + this->planeD) * this->planeN;
+    Vec3 velN = (planeN.dot(p->vel)) * planeN;
+    Vec3 velT = p->vel - velN;
 
-    Vec3 collisionVel = p->vel;
+    Vec3 finalvel = newvel - kFriction * velT;
 
-    p->vel = collisionVel - (1 + kElastic) * (this->planeN.dot(collisionVel)) * this->planeN;
-
-    Vec3 normalVelocity = (this->planeN.dot(p->vel)) * this->planeN;
-
-    Vec3 tangentVelocity = p->vel - normalVelocity;
-
-    p->vel = p->vel - kFriction * tangentVelocity;
+    p->vel = finalvel;
+    p->pos = newpos;
 }
 
 
@@ -151,7 +151,7 @@ void ColliderAABB::resolveCollision(Particle* p, double kElastic, double kFricti
     }
 }
 
-/*void particleCollisions(Particle* pi){
+void particleCollisions(Particle* pi){
     for (Particle *pj : pi->neighbors) {
         double minDist = 2.0 * pi->radius;
 
@@ -171,10 +171,10 @@ void ColliderAABB::resolveCollision(Particle* p, double kElastic, double kFricti
 
             pi->vel += tempNormal*(vj - vi);
             pj->vel += tempNormal*(vi - vj);
-        }
-    }
+        }
+    }
 }
-*/
+
 
 
 

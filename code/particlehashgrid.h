@@ -6,29 +6,26 @@
 #include <Particle.h>
 #include <vector>
 
-class ParticleHashGrid
-{
-public:
-    ParticleHashGrid(double h, int numberOfParticles){
-        this->h = h;
-        this->tableSize = 2 * numberOfParticles;
-    };
-
-    int hashCoords(double xi, double yi, double zi);
-    int intCoord(double coord);
-    void create(std::vector<Particle*> particles);
-    void query(Vec3 pos, double maxDist);
-    std::vector<int> getQueryIds(){return this->queryIds;};
-    int getQuerySize(){return this->querySize;};
-
-
-protected:
-    double h;
+class ParticleHashGrid {
+private:
+    double spacing;
     int tableSize;
     std::vector<int> cellStart;
     std::vector<int> cellEntries;
     std::vector<int> queryIds;
-    int querySize = 0;
+    int querySize;
+
+    int hashCoords(int xi, int yi, int zi);
+    int intCoord(double coord);
+    int hashPos(std::vector<double>& pos, int nr);
+
+public:
+    ParticleHashGrid(double spacing, int maxNumObjects);
+
+    void create(std::vector<Particle *> particles);
+    void query(const std::vector<Particle *>& particles, int i, double maxDist);
+    std::vector<int> getNeighbors(){return queryIds;};
+    int getQuerySize(){return querySize;};
 };
 
 #endif // PARTICLEHASHGRID_H

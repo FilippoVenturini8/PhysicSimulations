@@ -44,6 +44,7 @@ protected:
     QOpenGLVertexArrayObject* vaoSphereS = nullptr;
     QOpenGLVertexArrayObject* vaoFloor   = nullptr;
     QOpenGLVertexArrayObject* vaoWall    = nullptr;
+    QOpenGLVertexArrayObject* vaoCube    = nullptr;
     unsigned int numFacesSphereS = 0, numFacesSphereL = 0;
     unsigned int numMeshIndices = 0;
 
@@ -51,22 +52,31 @@ protected:
 
     std::vector<Particle*> particles;
     std::vector<Force*> forces;
-    int numParticlesX;
-    int numParticlesY;
-    int numParticlesZ;
+    int numPartX;
+    int numPartY;
+    int numPartZ;
     int numParticles;
     bool showParticles = true;
     double particleRadius = 1;
-    double particleSpacing = 3.0f * particleRadius;
+    double particleSpacing = 2.0f * particleRadius;
 
     ForceConstAcceleration* fGravity = nullptr;
     ForceNavierStockes* fNavierStockes = nullptr;
 
     IntegratorSymplecticEuler* integrator = nullptr;
-    ColliderPlane colliderFloor;
 
-    double colBounce = 0.2;
-    double colFriction = 0.1;
+    ColliderPlane colliderFloor;
+    ColliderPlane colliderCeiling;
+    ColliderPlane colliderWallLeft;
+    ColliderPlane colliderWallRight;
+    ColliderPlane colliderWallUp;
+    ColliderPlane colliderWallDown;
+
+    double colBounce = 0.01;
+    double colFriction = 0.05;
+
+    float MASS = 1.0f;
+    float boundDimensions = 40.0f;
 };
 
 #endif // SCENEFLUID_H

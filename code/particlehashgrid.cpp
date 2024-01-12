@@ -1,91 +1,84 @@
 #include "particlehashgrid.h"
-#include <cmath>
 #include <iostream>
 
-int ParticleHashGrid::hashCoords(double xi, double yi, double zi)
-{
-    int h = (int(xi) * 92837111)^(int(yi) * 689287499)^(int(zi) * 283923481);
-    return abs(h) % this->tableSize;
+int ParticleHashGrid::hashCoords(int xi, int yi, int zi) {
+    int h = (xi * 92837111) ^ (yi * 689287499) ^ (zi * 283923481); // Fantasy function
+    return std::abs(h) % tableSize;
 }
 
-int ParticleHashGrid::intCoord(double coord)
-{
-    return floor(coord / this->h);
+int ParticleHashGrid::intCoord(double coord) {
+    return static_cast<int>(std::floor(coord / spacing));
 }
 
-void ParticleHashGrid::create(std::vector<Particle*> particles)
-{
-    int numParticles = particles.size();
+int ParticleHashGrid::hashPos(std::vector<double>& pos, int nr) {
+    return hashCoords(
+        intCoord(pos[3 * nr]),
+        intCoord(pos[3 * nr + 1]),
+        intCoord(pos[3 * nr + 2])
+        );
+}
 
-    std::vector<int> zerosCellStart (this->tableSize + 1, 0);
-    std::vector<int> zerosEntries (numParticles, 0);
-    std::vector<int> defaultQueryIds (numParticles, -1);
+ParticleHashGrid::ParticleHashGrid(double spacing, int maxNumObjects) : spacing(spacing) {
+    tableSize = 2 * maxNumObjects;
+    cellStart.resize(tableSize + 1);
+    cellEntries.resize(maxNumObjects);
+    queryIds.resize(maxNumObjects);
+    querySize = 0;
+}
 
-    this->cellStart = zerosCellStart;
-    this->cellEntries = zerosEntries;
-    this->queryIds = defaultQueryIds;
+void ParticleHashGrid::create(std::vector<Particle *> particles) {
+    int numObjects = std::min(static_cast<int>(particles.size()), static_cast<int>(cellEntries.size()));
 
-    for(Particle* p: particles)
-    {
-        int hash = this->hashCoords(this->intCoord(p->pos.x()), this->intCoord(p->pos.y()), this->intCoord(p->pos.z()));
+    // Determine cell sizes
+    std::fill(cellStart.begin(), cellStart.end(), 0);
+    std::fill(cellEntries.begin(), cellEntries.end(), 0);
+
+    for(int i = 0; i < numObjects; i++){
+        Vec3 position = particles.at(i)->pos;
+        int hash = this->hashCoords(intCoord(position.x()), intCoord(position.y()), intCoord(position.z()));
         this->cellStart[hash]++;
     }
 
+    // Determine cell starts
     int start = 0;
-
-    for(int i = 0; i < this->tableSize; i++)
-    {
-        start += this->cellStart[i];
-        this->cellStart[i] = start;
+    for (int i = 0; i < tableSize; i++) {
+        start += cellStart[i];
+        cellStart[i] = start;
     }
+    cellStart[tableSize] = start;
 
-    this->cellStart[this->tableSize] = start;
-
-    for(int i = 0; i < numParticles; i++)
-    {
-        int hash = this->hashCoords(particles[i]->pos.x(), particles[i]->pos.y(), particles[i]->pos.z());
-        this->cellStart[hash]--;
-        this->cellEntries[this->cellStart[hash]] = i;
+    // Fill in objects ids
+    for (int i = 0; i < numObjects; i++) {
+        Vec3 position = particles.at(i)->pos;
+        int h = this->hashCoords(intCoord(position.x()), intCoord(position.y()), intCoord(position.z()));
+        cellStart[h]--;
+        cellEntries[cellStart[h]] = i;
     }
 }
 
-void ParticleHashGrid:: query(Vec3 pos, double maxDist)
-{
-    int x0 = this->intCoord(pos.x() - maxDist);
-    int y0 = this->intCoord(pos.y() - maxDist);
-    int z0 = this->intCoord(pos.z() - maxDist);
+void ParticleHashGrid::query(const std::vector<Particle *>& particles, int i, double maxDist) {
+    int x0 = intCoord(particles.at(i)->pos.x() - maxDist);
+    int y0 = intCoord(particles.at(i)->pos.y() - maxDist);
+    int z0 = intCoord(particles.at(i)->pos.z() - maxDist);
 
-    int x1 = this->intCoord(pos.x() + maxDist);
-    int y1 = this->intCoord(pos.y() + maxDist);
-    int z1 = this->intCoord(pos.z() + maxDist);
+    int x1 = intCoord(particles.at(i)->pos.x() + maxDist);
+    int y1 = intCoord(particles.at(i)->pos.y() + maxDist);
+    int z1 = intCoord(particles.at(i)->pos.z() + maxDist);
 
-    this->querySize = 0;
+    querySize = 0;
 
-    for(int xi = x0; xi <= x1; xi++)
-    {
-       for(int yi = y0; yi <= y1; yi++)
-        {
-            for(int zi = z0; zi <= z1; zi++)
-            {
-               int hash = this->hashCoords(xi, yi, zi);
+    for (int xi = x0; xi <= x1; xi++) {
+        for (int yi = y0; yi <= y1; yi++) {
+            for (int zi = z0; zi <= z1; zi++) {
+                int h = hashCoords(xi, yi, zi);
+                int start = cellStart[h];
+                int end = cellStart[h + 1];
 
-               int start = this->cellStart[hash];
-               int end = this->cellStart[hash + 1];
-
-               for(int j = start; j < end; j++) //It enters here only if the partial sums of 2 cells are different
-               {
-                   //If the neighbor is not already found due to hash collisions
-                   if(std::find(queryIds.begin(), queryIds.end(), this->cellEntries[j]) == queryIds.end()){
-                       this->queryIds[this->querySize] = this->cellEntries[j];
-
-                       this->querySize++;
-
-                       //TODO CLEAR BASING ON THE DISTANCES
-                   }
-
-               }
+                for (int i = start; i < end; i++) {
+                    queryIds[querySize] = cellEntries[i];
+                    querySize++;
+                }
             }
         }
     }
-
 }

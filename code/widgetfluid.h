@@ -15,6 +15,7 @@ public:
     explicit WidgetFluid(QWidget *parent = nullptr);
     ~WidgetFluid();
 
+    int getComboBoxIndex();
 private:
     Ui::WidgetFluid *ui;
 };

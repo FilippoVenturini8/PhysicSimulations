@@ -3,6 +3,8 @@
 
 #include "defines.h"
 
+#include <set>
+
 class Particle
 {
 public:
@@ -18,7 +20,7 @@ public:
     Vec3 color    = Vec3(1, 1, 1);
     unsigned int id = 0;
     bool isFixed;
-    std::vector<Particle*> *neighbors = new std::vector<Particle*>();
+    std::set<Particle*> neighbors;
 
     Particle() {
         pos	    = Vec3(0.0, 0.0, 0.0);

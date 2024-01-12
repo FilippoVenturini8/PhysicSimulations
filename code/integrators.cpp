@@ -22,14 +22,14 @@ void IntegratorSymplecticEuler::step(ParticleSystem &system, double dt) {
 }
 
 void IntegratorSymplecticEuler::stepWithoutPS(std::vector<Particle*> particles, double dt){
-    for (Particle* p : particles) {
-        Vec3 v0 = p->vel;
-        p->vel = v0 + dt * (p->force/p->mass);
+    for(int i = 0; i < particles.size(); i++){
+        Vec3 v0 = particles.at(i)->vel;
+        Vec3 x0 = particles.at(i)->pos;
 
-        Vecd p0 = p->pos;
-        Vecd v1 = p->vel;
-
-        p->pos = p0 + dt * v1;
+        Vec3 v1 = v0 + dt * particles.at(i)->force/particles.at(i)->mass;
+        Vec3 x1 = x0 + dt * v1;
+        particles.at(i)->vel = v1;
+        particles.at(i)->pos = x1;
     }
 }
 

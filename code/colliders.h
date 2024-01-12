@@ -71,5 +71,7 @@ protected:
     Vec3 dimension;
 };
 
+void particleCollisions(Particle* pi);
+
 
 #endif // COLLIDERS_H
