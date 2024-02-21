@@ -1,4 +1,11 @@
 # Physics Simulations
+
+<div align="center">
+    <img src="https://img.shields.io/badge/OpenGL-black?style=flat" alt="opengl" />
+    <img src="https://img.shields.io/badge/C%2B%2B-blue?style=flat" alt="cpp" />
+    <img src="https://img.shields.io/badge/QtCreator%205-green?style=flat" alt="qtcreator5" />
+</div>
+
 This project contains simulations of different physical behaviors implemented in four different scenes.
 
 ## Projectile Simulation
